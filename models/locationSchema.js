@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const loc=mongoose.Schema({
     locationName:{type:String,
   required:true,
@@ -13,3 +15,6 @@ const loc=mongoose.Schema({
   }
 }
   )
+
+  
+  module.exports = mongoose.model('Location',locationName);

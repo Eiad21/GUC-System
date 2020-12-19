@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const logObject=mongoose.Schema({
     timein:  {
     type: Date,
@@ -12,3 +14,7 @@ const logObject=mongoose.Schema({
     
     
     })
+
+    
+  
+  module.exports = mongoose.model('LogObject',logObject);
