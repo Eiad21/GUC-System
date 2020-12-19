@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const courseSchema=require('./CourseSchema').Course;
 
 // department schema
 const departmentSchema=new mongoose.Schema({
@@ -10,7 +11,9 @@ const departmentSchema=new mongoose.Schema({
         type:Number,
         required:true,
       },
-    //course:[courseSchema]
+    course:[courseSchema]
    });
 
-module.exports = mongoose.model('department',departmentSchema);
+
+   module.exports.constructor = mongoose.model('Department',departmentSchema);
+   module.exports.Dep = departmentSchema

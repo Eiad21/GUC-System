@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
+const logObject=require('./logObjectSchema').logObject;
 
 const logList=mongoose.Schema({
     memberId:Number,
     date:{type:Date,
       required:true,
     },
-    //log:[logObject]
+    log:[logObject]
   
   
   
   
   })
 
-  
-  
-  module.exports = mongoose.model('LogList',logList);
+  module.exports.constructor = mongoose.model('logList',logList);
+  module.exports.logList = logList

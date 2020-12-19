@@ -5,15 +5,15 @@ const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 
-//database tables:
-const Member=require('./models/memberSchema');
-const Course=require('./models/CourseSchema');
-const Department=require('./models/departmentSchema');
-const Faculty=require('./models/facultySchema');
-const Location=require('./models/locationSchema');
-const LogList=require('./models/logListSchema');
-const LogObject=require('./models/logObjectSchema');
-const Slot=require('./models/slotSchema');
+//database tables constructors:
+const Member=require('./models/memberSchema').constructor;
+const Course=require('./models/CourseSchema').constructor;
+const Department=require('./models/departmentSchema').constructor;
+const Faculty=require('./models/facultySchema').constructor;
+const Location=require('./models/locationSchema').constructor;
+const LogList=require('./models/logListSchema').constructor;
+const LogObject=require('./models/logObjectSchema').constructor;
+const Slot=require('./models/slotSchema').constructor;
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
@@ -35,15 +35,15 @@ mongoose.connect(url,connectionParams).then(()=>{
 }); 
 
 app.post('/schedule',(req,res)=>{
-    // const location=new Location({
-    //     locationName:"C7",
-    //         size:40,
-    //         locationType:"exams"
-    // })
+    const location=new Location({
+        locationName:"C7",
+            size:40,
+            locationType:"exams"
+    })
     const slot=new Slot({
         day:req.body.day,
         time:req.body.time,
-        // location:location,
+         location:location,
         course:req.body.course
     })
     slot.save().then((data)=>{

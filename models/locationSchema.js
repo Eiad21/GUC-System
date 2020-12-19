@@ -17,4 +17,5 @@ const loc=mongoose.Schema({
   )
 
   
-  module.exports = mongoose.model('Location',loc);
+  module.exports.constructor = mongoose.model('Location',loc);
+  module.exports.loc = loc
