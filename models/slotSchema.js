@@ -1,6 +1,7 @@
 
 const mongoose = require('mongoose');
-const loc = require('./locationSchema');
+const loc = require('./locationSchema').loc;
+
 
 const Slot=mongoose.Schema(
  {   
@@ -12,9 +13,9 @@ const Slot=mongoose.Schema(
           required:true
          },
   // please take note that it may cause problem 34an naming  plus syntax
-  //  location:{type:loc,
-  //          required:true
-  //           },
+   location:{type:loc,
+           required:true
+            },
     course:{type:String,
             required:true
   }
@@ -22,6 +23,6 @@ const Slot=mongoose.Schema(
   }
 
   )
-
-
-  module.exports=mongoose.model('Slot',Slot)
+  
+  module.exports.constructor = mongoose.model('Slot',Slot);
+  module.exports.Slot = Slot

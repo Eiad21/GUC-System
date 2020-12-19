@@ -15,6 +15,5 @@ const logObject=mongoose.Schema({
     
     })
 
-    
-  
-  module.exports = mongoose.model('LogObject',logObject);
+  module.exports.constructor = mongoose.model('LogObject',logObject);
+  module.exports.logObject = logObject

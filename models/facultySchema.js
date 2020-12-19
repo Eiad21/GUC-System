@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const departmentSchema=require('./departmentSchema').Dep;
 // FACULTY
 const facultySchema=new mongoose.Schema({
     facultyName:
@@ -10,8 +10,8 @@ const facultySchema=new mongoose.Schema({
             {type:String,
             required:true,
             },
-   // departments: [departmentSchema]
+    departments: [departmentSchema]
   });
-
-  module.exports = mongoose.model('Faculty',facultySchema);
   
+  module.exports.constructor = mongoose.model('Faculty',facultySchema);
+  module.exports.Faculty = facultySchema
