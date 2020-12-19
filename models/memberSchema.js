@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slot = require('./slotSchema');
 
 //  GUC Staff Members
 const memberSchema = mongoose.Schema({
@@ -39,7 +40,7 @@ const memberSchema = mongoose.Schema({
 
     },
 
-    schedule:[slot]
+    //schedule:[slot]
 });
 
 module.exports = mongoose.model('Member',memberSchema);

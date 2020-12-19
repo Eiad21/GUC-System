@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const MemberSchema = require('./members');
 
 
 const Course=mongoose.Schema(
@@ -7,7 +6,7 @@ const Course=mongoose.Schema(
 
     coverage:
     {
-        type:Float,
+        type:Number,
         required:true
     },
   name:
@@ -15,7 +14,7 @@ const Course=mongoose.Schema(
       type:String,
     required:true
   },
-  instructors:[MemberSchema.memberId]
+  instructors:[Number]
   }
   )
 

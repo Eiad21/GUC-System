@@ -5,7 +5,7 @@ const logList=mongoose.Schema({
     date:{type:Date,
       required:true,
     },
-    log:[logObject]
+    //log:[logObject]
   
   
   

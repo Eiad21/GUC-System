@@ -10,7 +10,7 @@ const facultySchema=new mongoose.Schema({
             {type:String,
             required:true,
             },
-    departments: [departmentSchema]
+   // departments: [departmentSchema]
   });
 
   module.exports = mongoose.model('Faculty',facultySchema);

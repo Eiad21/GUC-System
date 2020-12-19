@@ -10,7 +10,7 @@ const departmentSchema=new mongoose.Schema({
         type:Number,
         required:true,
       },
-    course:[courseSchema]
+    //course:[courseSchema]
    });
 
 module.exports = mongoose.model('department',departmentSchema);

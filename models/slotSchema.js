@@ -1,6 +1,6 @@
 
 const mongoose = require('mongoose');
-
+const loc = require('./locationSchema');
 
 const Slot=mongoose.Schema(
  {   
@@ -12,9 +12,9 @@ const Slot=mongoose.Schema(
           required:true
          },
   // please take note that it may cause problem 34an naming  plus syntax
-    location:{type:loc,
-            required:true
-             },
+  //  location:{type:loc,
+  //          required:true
+  //           },
     course:{type:String,
             required:true
   }
