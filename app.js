@@ -1,6 +1,7 @@
 const express = require('express');
 app = express();
 var HODroutes = require("./routes/HodRoutes")
+var HRroutes = require("./routes/HRRoutes")
 const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
@@ -8,7 +9,8 @@ const jwt=require('jsonwebtoken');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
-app.use("/Hod",HODroutes)
+app.use("/Hod",HODroutes);
+app.use("/HR",HRroutes);
 //database tables constructors:
  const Member=require('./models/memberSchema').constructor;
 //const { member } = require('./models/memberSchema');
