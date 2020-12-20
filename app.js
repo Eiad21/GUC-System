@@ -10,9 +10,9 @@ const jwt=require('jsonwebtoken');
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use("/Hod",HODroutes);
-app.use("/HR",HRroutes);
+app.use("/hr",HRroutes);
 //database tables constructors:
- const Member=require('./models/memberSchema').constructor;
+// const Member=require('./models/memberSchema').constructor;
 //const { member } = require('./models/memberSchema');
 // const Course=require('./models/CourseSchema').constructor;
 // const Department=require('./models/departmentSchema').constructor;

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const courseSchema=require('./CourseSchema').Course;
+const courseSchema=require('./CourseSchema').courseSchema;
 const memberSchema=require('./memberSchema').member;
 
 // department schema
