@@ -1,12 +1,17 @@
 const express = require('express');
 app = express();
+var HODroutes = require("./routes/HodRoutes")
+const mongoose=require('mongoose');
+const bcrypt=require('bcryptjs');
+const jwt=require('jsonwebtoken');
 
-// const mongoose=require('mongoose');
-// const bcrypt=require('bcryptjs');
-// const jwt=require('jsonwebtoken');
 
-// //database tables constructors:
-// const Member=require('./models/memberSchema').constructor;
+app.use(express.json());
+app.use(express.urlencoded({extended:false}));
+app.use("/Hod",HODroutes)
+//database tables constructors:
+ const Member=require('./models/memberSchema').constructor;
+//const { member } = require('./models/memberSchema');
 // const Course=require('./models/CourseSchema').constructor;
 // const Department=require('./models/departmentSchema').constructor;
 // const Faculty=require('./models/facultySchema').constructor;
@@ -15,8 +20,7 @@ app = express();
 // const LogObject=require('./models/logObjectSchema').constructor;
 // const Slot=require('./models/slotSchema').constructor;
 
-// app.use(express.json());
-// app.use(express.urlencoded({extended:false}));
+ 
 
 // const connectionParams={
 //     useNewUrlParser:true,
@@ -24,8 +28,9 @@ app = express();
 //     useUnifiedTopology:true
 // }
 
-// // const url="mongodb+srv://abdoolelcool:<password>@cluster0.vf8uu.mongodb.net/<dbname>?retryWrites=true&w=majority"
-// const url="mongodb+srv://sawan:7777777o@cluster0.d4j6s.mongodb.net/TheSawanDB?retryWrites=true&w=majority"
+// // // const url="mongodb+srv://abdoolelcool:<password>@cluster0.vf8uu.mongodb.net/<dbname>?retryWrites=true&w=majority"
+// // const url="mongodb+srv://sawan:7777777o@cluster0.d4j6s.mongodb.net/TheSawanDB?retryWrites=true&w=majority"
+// const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
 
 
 // mongoose.connect(url,connectionParams).then(()=>{
@@ -33,6 +38,35 @@ app = express();
 // }).catch(()=>{
 //     console.log("error in database connection");
 // }); 
+ //app.use("/",routes)
+ 
+
+
+//  const memberSchema = new Member({
+//     name:"Kimo"
+    
+       
+//     ,
+
+//     memberId: 6
+//     ,
+    
+//     Facultyname:"Pharmacy"
+//     ,
+
+//     department:"CS"
+//   ,
+
+//     email:"kofta222@yahoo.com",
+
+//     password:"b555555",
+
+//     schedule:[]
+// });
+
+// memberSchema.save();
+
+ 
 
 // app.post('/schedule',(req,res)=>{
 //     const location=new Location({
@@ -56,6 +90,6 @@ app = express();
 // app.get('/schedule',(req,res)=>{
     
 // })
-
+app.listen(8080)
 module.exports.app = app
 //module.export = app;
