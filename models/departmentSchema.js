@@ -16,7 +16,7 @@ const departmentSchema=new mongoose.Schema({
       type:String,
       required:true,
     },
-    course:[courseSchema],
+    courses:[courseSchema],
     staff:[memberSchema]
    });
 
