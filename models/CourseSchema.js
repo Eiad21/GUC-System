@@ -4,7 +4,7 @@ const memberSchema=require('./memberSchema').member;
 const { courseSlotSchema }=require('./courseSlotSchema');
 
 const courseSchema=mongoose.Schema({
-  name:{
+  courseName:{
     type:String,
     required:true
   },
