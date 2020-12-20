@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const courseSchema=require('./CourseSchema').Course;
+const memberSchema=require('./memberSchema').member;
 
 // department schema
 const departmentSchema=new mongoose.Schema({
@@ -7,13 +8,18 @@ const departmentSchema=new mongoose.Schema({
         type:String,
         required:true,
       },
-    headID:{  // one to one ? then schema but its better to avoid anomalies
-        type:Number,
+    headID:{ 
+        type:String,
         required:true,
       },
-    course:[courseSchema]
+    headName:{
+      type:String,
+      required:true,
+    },
+    course:[courseSchema],
+    staff:[memberSchema]
    });
 
 
    module.exports.constructor = mongoose.model('Department',departmentSchema);
-   module.exports.Dep = departmentSchema
+   module.exports.Dep = departmentSchema;

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const Request=mongoose.Schema({
+const requestSchema=mongoose.Schema({
 
     date:
     {
@@ -12,14 +12,23 @@ const Request=mongoose.Schema({
     {
         type:String
     },
-
-    member:
-    {
-        type:Number,
-        required:true,
-        ref:"Member"
+    content:{
+        type:String
     },
-
+    sender:
+    {
+        type:String,
+        required:true,
+      // let's check about referencing
+        //  ref:"Member"
+    },
+    reciever:
+    {
+        type:String,
+        required:true,
+      // let's check about referencing
+        //  ref:"Member"
+    },
     type:
     {
         // leave OR slot_linking OR replacement OR change_day_off
@@ -40,4 +49,5 @@ const Request=mongoose.Schema({
     }
 })
 
-  module.exports = mongoose.model('Request',Request);
+  module.exports.requestModel = mongoose.model('Request',requestSchema);
+  module.exports.requestSchema = requestSchema;

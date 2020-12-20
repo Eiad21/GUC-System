@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const slot = require('./slotSchema').Slot;
+const {slotSchema} = require('./slotSchema');
 
 //  GUC Staff Members
 const memberSchema = mongoose.Schema({
@@ -19,7 +19,8 @@ const memberSchema = mongoose.Schema({
     {
         type:String,
         required:true,
-        ref:"Faculty"   // is this correct?
+        // let's check for referencing
+ //       ref:"Faculty"   // is this correct?
     },
 
     department:
@@ -39,8 +40,13 @@ const memberSchema = mongoose.Schema({
         required:true,
 
     },
-
-    schedule:[slot]
+    salary:{
+        type:Number
+    },
+    officeLocation:{
+        type:String
+    },
+    schedule:[slotSchema]
 });
 
 module.exports.constructor = mongoose.model('Member',memberSchema);

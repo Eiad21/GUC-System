@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const loc=mongoose.Schema({
+const locationSchema=mongoose.Schema({
     locationName:{type:String,
   required:true,
   },
-  size:{type:Number,
+  capacity:{type:Number,
   required:true,
   },
   locationType:{
@@ -17,5 +17,5 @@ const loc=mongoose.Schema({
   )
 
   
-  module.exports.constructor = mongoose.model('Location',loc);
-  module.exports.loc = loc
+  module.exports.constructor = mongoose.model('Location',locationSchema);
+  module.exports.locationSchema = locationSchema

@@ -1,22 +1,20 @@
 
 const mongoose = require('mongoose');
-const loc = require('./locationSchema').loc;
 
 
-const Slot=mongoose.Schema(
+const slotSchema=mongoose.Schema(
  {   
 
-    day:{type:String,
+    day:{type:String, // not sure about the type
         required:true,
         },
-    time:{type:String,
+    time:{type:Number, // 1 2 3 4 5
           required:true
          },
-  // please take note that it may cause problem 34an naming  plus syntax
-   location:{type:loc,
+   location:{type:String,
            required:true
             },
-    course:{type:String,
+    courseName:{type:String,
             required:true
   }
 
@@ -24,5 +22,5 @@ const Slot=mongoose.Schema(
 
   )
   
-  module.exports.constructor = mongoose.model('Slot',Slot);
-  module.exports.Slot = Slot
+  module.exports.constructor = mongoose.model('slot',slotSchema);
+  module.exports.slotSchema = slotSchema
