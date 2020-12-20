@@ -10,7 +10,7 @@ const loc=mongoose.Schema({
   locationType:{
   
     type:String,
-    required:true,
+    required:true
   
   }
 }
