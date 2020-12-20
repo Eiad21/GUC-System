@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const loc=mongoose.Schema({
     locationName:{type:String,
   required:true,
@@ -8,8 +10,12 @@ const loc=mongoose.Schema({
   locationType:{
   
     type:String,
-    required:true,
+    required:true
   
   }
 }
   )
+
+  
+  module.exports.constructor = mongoose.model('Location',loc);
+  module.exports.loc = loc
