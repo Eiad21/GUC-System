@@ -3,13 +3,15 @@ var router = express.Router();
 const Location = require("../models/locationSchema").constructor
 const Faculty = require("../models/facultySchema").constructor
 const Department = require("../models/departmentSchema").constructor
+const Course = require("../models/CourseSchema").constructor
+
 
 // HR Routes
 // Location manipulation
 router.post('/addLocation', async (req,res)=>{
     const location= await new Location({
         locationName:req.body.locationName,
-        size:req.body.size,
+        capacity:req.body.capacity,
         locationType:req.body.locationType
     });
     location.save().then((data)=>{
@@ -27,7 +29,7 @@ router.post('/updateLocation', async (req,res)=>{
         {locationName: req.body.locationNameOld},
         {
             locationName:req.body.locationNameNew,
-            size:req.body.size,
+            capacity:req.body.capacity,
             locationType:req.body.locationType
         },
         { new: true },)
@@ -170,12 +172,22 @@ router.post('/updateDepartment', async (req,res)=>{
                     doc.departments[i].headName = req.body.headName;
                     
                     // Save department with updated values
-                    doc.save();
+                    doc.save().then((doc) => {
+                        console.log(doc);
+                        res.send(doc)
+                      })
+                      .catch((err) => {
+                          console.error(err);
+                          res.send(err)
+                    }
+                );
                     break;
                 }
             }
-            console.log(doc);
-            res.send(doc);
+            if(!flag){
+                res.statusCode = 404;
+                res.send();
+            }
           })
           .catch((err) => {
               console.error(err);
@@ -208,6 +220,147 @@ router.post('/deleteDepartment', async (req,res)=>{
             }
             console.log(doc);
             res.send(doc);
+          })
+          .catch((err) => {
+              console.error(err);
+              res.send(err)
+        }
+    );
+})
+
+// Course within Department within Faculty manipulation
+router.post('/addCourse', async (req,res)=>{
+    
+    // Find the Faculty
+    Faculty.findOne(
+        {facultyName: req.body.facultyName})
+             
+        .then(async (doc) => {
+            console.log('found fac');
+            // Find the Department
+            var index
+            var flag = false;
+            for(i in doc.departments){
+                if(doc.departments[i].departmentName === req.body.departmentName){
+                    flag = true;
+                    console.log('found dep');
+                    // Add the course
+                    const course= await new Course({
+                        courseName:req.body.courseName,
+                        coverage:req.body.coverage,
+                        coordiantorID:req.body.coordiantorID,
+                        coordinatorName:req.body.coordiantorName
+                    });
+
+                    doc.departments[i].courses.push(course);
+                    
+                    // Save department with updated values
+                    await doc.save();
+                    res.send(course);
+                    break;
+                }
+            }
+            if(!flag){
+                res.statusCode = 404;
+                res.send();
+            }
+          })
+          .catch((err) => {
+              console.error("err");
+              res.send(err)
+        }
+    );
+})
+
+router.post('/updateCourse', async (req,res)=>{
+    
+    // Find the Faculty
+    Faculty.findOne(
+        {facultyName: req.body.facultyName})
+             
+        .then(async (doc) => {
+            // Find the Department
+            var flag = false;
+            for(i in doc.departments){
+                if(doc.departments[i].departmentName === req.body.departmentName){
+                    console.log("Found DEP");
+                    // Found the Department
+                    
+                    // Find the Course
+                    for(j in doc.departments[i].courses){
+                        console.log(doc.departments[i].courses[j].courseName + "and" + req.body.courseNameOld);
+                        if(doc.departments[i].courses[j].courseName === req.body.courseNameOld){
+                            console.log("Found Course")
+                            flag = true;
+                            doc.departments[i].courses[j].courseName = req.body.courseNameNew
+                            doc.departments[i].courses[j].coverage = req.body.coverage
+                            doc.departments[i].courses[j].coordiantorID = req.body.coordiantorID
+                            doc.departments[i].courses[j].coordinatorName = req.body.coordinatorName
+                            //TEST THIS METHOD
+                        }
+                    }
+
+                    break;
+                }
+            }
+            if(!flag){
+                res.statusCode = 404;
+                res.send();
+            }
+            else{
+                // Save department with updated values
+                doc.save();
+                console.log(doc);
+                res.send(doc);
+            }
+          })
+          .catch((err) => {
+              console.error(err);
+              res.send(err)
+        }
+    );
+})
+
+router.post('/deleteCourse', async (req,res)=>{
+    
+    // Find the Faculty
+    Faculty.findOne(
+        {facultyName: req.body.facultyName})
+             
+        .then(async (doc) => {
+            // Find the Department
+            var flag = false;
+            for(i in doc.departments){
+                if(doc.departments[i].departmentName === req.body.departmentName){
+                    console.log("Found DEP");
+                    // Found the Department
+                    
+                    // Find the Course
+                    for(j in doc.departments[i].courses){
+                        console.log(doc.departments[i].courses[j].courseName + "and" + req.body.courseName);
+                        if(doc.departments[i].courses[j].courseName === req.body.courseName){
+                            console.log("Found Course")
+                            flag = true;
+                            
+                            doc.departments[i].courses.splice(j, 1);
+
+                            //TEST THIS METHOD
+                        }
+                    }
+
+                    break;
+                }
+            }
+            if(!flag){
+                res.statusCode = 404;
+                res.send();
+            }
+            else{
+                // Save department with updated values
+                doc.save();
+                console.log(doc);
+                res.send(doc);
+            }
           })
           .catch((err) => {
               console.error(err);
