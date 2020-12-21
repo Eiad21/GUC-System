@@ -22,7 +22,7 @@ const memberSchema = mongoose.Schema({
     Facultyname:
     {
         type:String,
-        required:true,
+//        required:true,
         // let's check for referencing
  //       ref:"Faculty"   // is this correct?
     },
@@ -30,7 +30,7 @@ const memberSchema = mongoose.Schema({
     department:
     {
         type:String,
-        required:true,
+//        required:true,
     },
 
     email:{
