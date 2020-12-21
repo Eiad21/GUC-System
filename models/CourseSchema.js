@@ -24,25 +24,41 @@ const courseSchema=mongoose.Schema({
 
   instructors:[{
     id:{
-    type:String,
-    required:true
-  },
-  name:{
-    type:String,
-    required:true
-  }
-}],
+      type:String,
+      required:true
+    },
+    name:{
+      type:String,
+      required:true
+    },
+    mail:{
+      type:String,
+      required:true
+    },
+    office:{
+      type:String,
+      required:true
+    }
+  }],
 
   TAs:[{
     id:{
-    type:String,
-    required:true
-  },
-  name:{
-    type:String,
-    required:true
-  }
-}],
+      type:String,
+      required:true
+    },
+    name:{
+      type:String,
+      required:true
+    },
+    mail:{
+      type:String,
+      required:true
+    },
+    office:{
+      type:String,
+      required:true
+    }
+  }],
   courseSchedule:[courseSlotSchema]
 })
 
