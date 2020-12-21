@@ -51,6 +51,10 @@ const requestSchema=mongoose.Schema({
     newDayOff:{
         type:String
     },
+    //in case of annual leave and found a replacement
+    theReplacementId:{
+        type:String
+    },
 
     //in case slot linking request
     slot:[slotSchema]

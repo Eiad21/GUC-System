@@ -8,6 +8,7 @@ const memberSchema = mongoose.Schema({
         type:String,
         required:true
     },
+    //male or female
     gender:{
         type:String,
         required:true

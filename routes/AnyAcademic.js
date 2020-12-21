@@ -5,6 +5,8 @@ const Faculty = require("../models/facultySchema").constructor
 const Slot = require("../models/slotSchema").constructor
 const Member = require("../models/memberSchema").constructor
 const Request = require("../models/requestSchema").requestModel
+const Course = require("../models/CourseSchema").constructor
+const Department = require("../models/departmentSchema").constructor
 
 
 app.use(express.json());
@@ -95,7 +97,8 @@ app.post('/slotLinkReq',async(req,res)=>{
         const user=await Member.findOne({_id:loggedinID});
         
         //query to get the course coordinator
-        const reciever="15701"
+        const course=await Course.findOne({courseName:slotCourse});
+        const reciever=course.coordiantorID
 
         if(!reason){
             reason="";
@@ -133,7 +136,8 @@ app.post('/changeDayOffReq',async(req,res)=>{
         let {reason,content,comment,newDayOff}=req.body;
 
         //query to get the HOD
-        const reciever="15701"
+        const dep=await Department.findOne({departmentName:user.department});
+        const reciever=dep.headID
 
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
@@ -242,6 +246,165 @@ app.post('/cancelReq',async(req,res)=>{
         return res.status(400).json({msg:"Cannot cancel this request"});
         
 
+    }
+    catch (error) {
+        res.status(500).json({error:error.message})
+    }
+})
+
+app.post('/submitLeaves',async(req,res)=>{
+    try{
+        let {date,reason,content,comment,type,theReplacementId}=req.body;
+
+        const loggedinID="5fde5008edfe910c8c3dc6d2";
+        const user=await Member.findOne({_id:loggedinID});
+        
+
+        //query to get the HOD
+        const dep=await Department.findOne({departmentName:user.department});
+        const reciever=dep.headID
+
+
+        if(!type){
+            return res.status(400).json({msg:"Type is required"});
+        }
+
+        if(type=='annual_leave'){
+            if(!date){
+                return res.status(400).json({msg:"Date is required"});
+            }
+            if(new Date(date)<=new Date()) {
+                return res.status(400).json({msg:"Annual leaves should be submitted before the targeted day"});
+            }
+            const request=new Request({
+                date:date,
+                reason:reason,
+                content:content,
+                sender:user.memberId,
+                reciever:reciever,
+                type:type,
+                comment:comment,
+                status:"pending",
+                theReplacementId:theReplacementId
+    
+            })
+            request.save().then((data)=>{
+                res.json(data);
+            }).catch((error)=>{
+                res.json(error);
+            });
+
+            return;
+        }
+
+        if(type=='accidental_leave'){
+            if(!date){
+                return res.status(400).json({msg:"Date is required"});
+            }
+            const request=new Request({
+                date:date,
+                reason:reason,
+                content:content,
+                sender:user.memberId,
+                reciever:reciever,
+                type:type,
+                comment:comment,
+                status:"pending"
+    
+            })
+            request.save().then((data)=>{
+                res.json(data);
+            }).catch((error)=>{
+                res.json(error);
+            });
+
+            return;
+        }
+
+        if(type=='sick_leave'){
+            if(!date){
+                return res.status(400).json({msg:"Date is required"});
+            }
+            const diffTime = new Date() - new Date(date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if(new Date(date)<=new Date() && diffDays>3) {
+                return res.status(400).json({msg:"Sick leave can not be submitted after three days from the sick day"});
+            }
+            const request=new Request({
+                date:date,
+                reason:reason,
+                content:content,
+                sender:user.memberId,
+                reciever:reciever,
+                type:type,
+                comment:comment,
+                status:"pending"
+    
+            })
+            request.save().then((data)=>{
+                res.json(data);
+            }).catch((error)=>{
+                res.json(error);
+            });
+
+            return;
+        }
+
+        if(type=='maternity_leave'){
+            if(!date){
+                return res.status(400).json({msg:"Date is required"});
+            }
+            if(user.gender=='male'){
+                return res.status(400).json({msg:"Maternity leaves should only be submitted by female staff members"});
+            }
+            const request=new Request({
+                date:date,
+                reason:reason,
+                content:content,
+                sender:user.memberId,
+                reciever:reciever,
+                type:type,
+                comment:comment,
+                status:"pending"
+    
+            })
+            request.save().then((data)=>{
+                res.json(data);
+            }).catch((error)=>{
+                res.json(error);
+            });
+
+            return;
+        }
+        
+        if(type=='compensation_leave'){
+            if(!date){
+                return res.status(400).json({msg:"Date is required"});
+            }
+            if(!reason){
+                return res.status(400).json({msg:"Reason is required"});
+            }
+            const request=new Request({
+                date:date,
+                reason:reason,
+                content:content,
+                sender:user.memberId,
+                reciever:reciever,
+                type:type,
+                comment:comment,
+                status:"pending"
+    
+            })
+            request.save().then((data)=>{
+                res.json(data);
+            }).catch((error)=>{
+                res.json(error);
+            });
+
+            return;
+        }
+        
+        
     }
     catch (error) {
         res.status(500).json({error:error.message})
