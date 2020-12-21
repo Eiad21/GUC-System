@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-const memberSchema=require('./memberSchema').member;
 const { courseSlotSchema }=require('./courseSlotSchema');
 
 const courseSchema=mongoose.Schema({
@@ -22,8 +21,28 @@ const courseSchema=mongoose.Schema({
     type:String,
     required:true
   },
-  instructors:[memberSchema],
-  TAs:[memberSchema],
+
+  instructors:[{
+    id:{
+    type:String,
+    required:true
+  },
+  name:{
+    type:String,
+    required:true
+  }
+}],
+
+  TAs:[{
+    id:{
+    type:String,
+    required:true
+  },
+  name:{
+    type:String,
+    required:true
+  }
+}],
   courseSchedule:[courseSlotSchema]
 })
 
