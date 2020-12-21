@@ -6,7 +6,8 @@ const { courseSlotSchema }=require('./courseSlotSchema');
 const courseSchema=mongoose.Schema({
   courseName:{
     type:String,
-    required:true
+    required:true,
+    unique:true
   },
   coverage:
   {
