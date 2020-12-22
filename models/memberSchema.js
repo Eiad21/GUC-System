@@ -50,6 +50,12 @@ const memberSchema = mongoose.Schema({
     officeLocation:{
         type:String
     },
+    MemberRank:
+    {
+        locationType:String,
+        
+
+    },
     schedule:[slotSchema]
 });
 

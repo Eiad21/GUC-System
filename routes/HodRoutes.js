@@ -2,7 +2,7 @@ const express = require("express")
 var router = express.Router();
 const memberSchema = require("../models/memberSchema").constructor
 const CourseSchema = require("../models/CourseSchema").constructor
-
+const DepartmentSchema = require("../models/departmentSchema").constructor
 // get all instructors
  router.get("/", async(req,res,next)=>{
 
@@ -194,6 +194,30 @@ memberSchema.find({Facultyname:"Pharmacy"},(err,user)=>{
                 
                         })
                     })
+ ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ // view all staff            
+ 
+ router.get("/viewallstaffInMyDepartment", async(req,res,next)=>{
+     //change this hardcoded id to the id of the HOd from Token
+     await DepartmentSchema.findOne({headID:"1"})
+     .then((doc)=>{
+         console.log(doc.staff)
+         res.send(doc.staff)
+     })
+ })
+
+
+ router.get("/viewallstaffforThisCourse/:CourseName", async(req,res,next)=>{
+    //change this hardcoded id to the id of the HOd from Token
+    await DepartmentSchema.findOne({headID:"1"})
+    .then((doc)=>{
+
+      const CourseRecord= doc.courses.filter((value,index)=>{return value.courseName==req.params.CourseName})
+      var allcourseinsideDepartmentInstructors={Instructors:CourseRecord[0].instructors, TAs:CourseRecord[0].TAs}
+     res.send(allcourseinsideDepartmentInstructors)
+        
+    })
+})
     
 
 
