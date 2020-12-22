@@ -15,7 +15,7 @@ const memberSchema = mongoose.Schema({
         required:true,
     },
     
-    Facultyname:
+    FacultyName:
     {
         type:String,
         required:true,
@@ -23,7 +23,7 @@ const memberSchema = mongoose.Schema({
  //       ref:"Faculty"   // is this correct?
     },
 
-    department:
+    departmentName:
     {
         type:String,
         required:true,

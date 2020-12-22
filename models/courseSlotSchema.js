@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 
 const courseSlotSchema=mongoose.Schema({   
+    slotID:{
+            type:String,
+            required:true
+    },
     day:{
         type:String, // not sure about the time
         required:true,
