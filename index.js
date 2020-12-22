@@ -1,18 +1,20 @@
 const mongoose = require('mongoose');
 const app = require('./app').app;
-
-
+const courseschema = require('./models/CourseSchema').constructor
+const departmentSchema= require("./models/departmentSchema").constructor
+const memberSchema = require("./models/memberSchema").constructor
 
 const connectionParams={
     useNewUrlParser:true,
     useCreateIndex:true,
-    useUnifiedTopology:true
+    useUnifiedTopology:true,
+    useFindAndModify:false
 }
 
 // const url="mongodb+srv://abdoolelcool:<password>@cluster0.vf8uu.mongodb.net/<dbname>?retryWrites=true&w=majority"
 // const url="mongodb+srv://sawan:7777777o@cluster0.d4j6s.mongodb.net/TheSawanDB?retryWrites=true&w=majority"
-// const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
-const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
+ const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
+//const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
 
 
 mongoose.connect(url,connectionParams).then(()=>{
@@ -40,7 +42,59 @@ mongoose.connect(url,connectionParams).then(()=>{
 //    }
 // )
 
-//  loc1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
+// let member1 = new  memberSchema(
+//     {name:"Kimo",
+//     gender:"male",
+//    memberId:6,
+//    Facultyname:"Pharmacy",
+//    department:"CS",
+//    email:"kofta222@yahoo.com",
+//    password:"b555555",
+//    salary:1,
+//     officeLocation:"c5",
+//    schedule:[]
+//    } 
+//     )
+
+
+//  let member2 = new  memberSchema(
+//     {name:"Kimo",
+//     gender:"male",
+//    memberId:4,
+//    Facultyname:"Pharmacy",
+//    department:"CS",
+//    email:"kofta22@yahoo.com",
+//    password:"b555555",
+//    salary:1,
+//     officeLocation:"c5",
+//    schedule:[]
+//    } 
+//     )
+
+// let course1=new courseschema
+// ( {courseName:"Csen502",
+//   coverage:75,
+  
+
+//   coordiantorID:4,
+//   coordinatorName:"Kimo",
+//   instructors:[member1],
+//   TAs:[member2],
+//   courseSchedule:[]
+// }
+// )
+ //course1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
+
+
+
+// const department1=new departmentSchema({
+//     departmentName:"CS",
+//     headID:1,
+//     headName:"Kimo",
+//     courses:[course1],
+//     staff:[member2,member1]
+//    });
+//   department1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 //  slot1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 
 

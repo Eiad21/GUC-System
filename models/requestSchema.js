@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
+const {slotSchema} = require('./slotSchema');
 
 const requestSchema=mongoose.Schema({
 
     date:
     {
-        type:Date,
-        required:true
+        type:Date
     },
 
     reason:
@@ -46,7 +46,18 @@ const requestSchema=mongoose.Schema({
     comment:
     {
         type:String
-    }
+    },
+    //in case of change_day_off
+    newDayOff:{
+        type:String
+    },
+    //in case of annual leave and found a replacement
+    theReplacementId:{
+        type:String
+    },
+
+    //in case slot linking request
+    slot:[slotSchema]
 })
 
   module.exports.requestModel = mongoose.model('Request',requestSchema);

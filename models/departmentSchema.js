@@ -17,8 +17,25 @@ const departmentSchema=new mongoose.Schema({
       required:true,
     },
     courses:[courseSchema],
-    staff:[memberSchema]
-   });
+    staff:[{
+        id:{
+          type:String,
+          required:true
+        },
+        name:{
+          type:String,
+          required:true
+        },
+        mail:{
+          type:String,
+          required:true
+        },
+        office:{
+          type:String,
+          required:true
+        }
+      }]
+  });
 
 
    module.exports.constructor = mongoose.model('Department',departmentSchema);

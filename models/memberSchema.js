@@ -6,9 +6,13 @@ const memberSchema = mongoose.Schema({
     name:
     {
         type:String,
-        required:true,
+        required:true
     },
-
+    //male or female
+    gender:{
+        type:String,
+        required:true
+    },
     memberId:
     {
         type:String,
@@ -18,7 +22,7 @@ const memberSchema = mongoose.Schema({
     FacultyName:
     {
         type:String,
-        required:true,
+//        required:true,
         // let's check for referencing
  //       ref:"Faculty"   // is this correct?
     },
@@ -26,7 +30,7 @@ const memberSchema = mongoose.Schema({
     departmentName:
     {
         type:String,
-        required:true,
+//        required:true,
     },
 
     email:{
@@ -45,6 +49,12 @@ const memberSchema = mongoose.Schema({
     },
     officeLocation:{
         type:String
+    },
+    MemberRank:
+    {
+        locationType:String,
+        
+
     },
     schedule:[slotSchema]
 });
