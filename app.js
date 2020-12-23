@@ -6,13 +6,15 @@ var AnyAcademic=require("./routes/AnyAcademic")
 const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
-
+const memberRoutes=require('./routes/memberRoutes')
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use("/Hod",HODroutes);
 app.use("/hr",HRroutes);
 app.use("/anyAcademic",AnyAcademic);
+app.use("/memberRoutes",memberRoutes);
+
 //database tables constructors:
 // const Member=require('./models/memberSchema').constructor;
 //const { member } = require('./models/memberSchema');
