@@ -6,7 +6,6 @@ const MemberModel = require("../models/memberSchema").constructor;
 // const Department = require("../models/departmentSchema").constructor
 
 // Instructor Routes
-// Location manipulation
 const getDepartmentsInFac = async function(facultyName){
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     return fac.departments;
@@ -28,6 +27,18 @@ const isInstructorOfCourse = function(course,instructorID){
         return false;
     }
 };
+const isTAOfCourse = function(course,TAID){
+    const TA = course.TAs.find(t => t.memberID == TAID);
+    if(TA)
+    {
+        // exist
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+};
 const getStaffOfDep = function(facultyName,departmentName){
     const deps = getDepartmentsInFac(facultyName);
     const department = deps.find(dep => dep.departmentName == departmentName);
@@ -35,19 +46,19 @@ const getStaffOfDep = function(facultyName,departmentName){
 };
 
 // input member
-router.get('/viewCoverage', async (req,res)=>{
+router.get('/viewCoverages', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
     const coverages = {};
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,req.member.memberID))
+        if(isInstructorOfCourse(course,req.signedMember.memberID))
         {
             const {courseName,coverage} = course;
             coverages[courseName] = coverage;
@@ -64,12 +75,12 @@ router.get('/viewCoursesAssignments', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
     const schedules = {};
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,req.member.memberID))
+        if(isInstructorOfCourse(course,req.signedMember.memberID))
         {
             const {courseName,courseSchedule} = course;
             schedules[courseName] = courseSchedule;
@@ -79,17 +90,21 @@ router.get('/viewCoursesAssignments', async (req,res)=>{
 })
 
 // input member & courseName
-router.get('/viewOneCourseAssignments', async (req,res)=>{
+router.get('/viewOneCourseAssignments/:courseName', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
-    const course = depCourses.find(cou => cou.courseName == req.body.courseName);
+    const course = depCourses.find(cou => cou.courseName == req.params.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    {
+        return res.status(401).send("Not authorized to view this course!");
+    }
     res.send(course.courseSchedule);
 })
 
@@ -97,100 +112,69 @@ router.get('/viewOneCourseAssignments', async (req,res)=>{
 router.get('/viewDepartmentStaff', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const depStaff = getStaffOfDep(facultyName,departmentName);
-    const modifiedDepStaff = []; // will not have password and other personal info like salary.
-    depStaff.forEach((staffMember)=>{
-        const {name, memberId, FacultyName, departmentName, email, officeLocation, schedule} = staffMember;
-        const modifiedStaffMember = {
-            memberId: memberId,
-            name: name,
-            FacultyName: FacultyName,
-            departmentName: departmentName,
-            email: email,
-            officeLocation: officeLocation,
-            schedule: schedule
-        };
-        modifiedDepStaff.push(modifiedStaffMember);
-    });
-    res.send(modifiedDepStaff);
+    res.send(depStaff);
 });
 
 // input member & course
-router.get('/viewCourseStaff', async (req,res)=>{
+router.get('/viewCourseStaff/:courseName', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
-    const course = depCourses.find(course => course.courseName == req.body.courseName);
-    const modifiedInstructors = []; // will not have password and other personal info like salary.
-    course.instructors.forEach((instructor)=>{
-        const {name, memberId, FacultyName, departmentName, email, officeLocation, schedule} = instructor;
-        const modifiedInstructor = {
-            memberId: memberId,
-            name: name,
-            FacultyName: FacultyName,
-            departmentName: departmentName,
-            email: email,
-            officeLocation: officeLocation,
-            schedule: schedule
-        };
-        modifiedInstructors.push(modifiedInstructor);
-    });
-    const modifiedTAs = []; // will not have password and other personal info like salary.
-    course.TAs.forEach((TA)=>{
-        const {name, memberId, FacultyName, departmentName, email, officeLocation, schedule} = TA;
-        const modifiedTA = {
-            memberId: memberId,
-            name: name,
-            FacultyName: FacultyName,
-            departmentName: departmentName,
-            email: email,
-            officeLocation: officeLocation,
-            schedule: schedule
-        };
-        modifiedTAs.push(modifiedTA);
-    });
+    const course = depCourses.find(course => course.courseName == req.params.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
     const staffInfo = {
-        instructors: modifiedInstructors,
-        TAs: modifiedTAs
+        instructors: course.instructors,
+        TAs: course.TAs
     };
     res.send(staffInfo);
 })
 
-router.post('/assignAcademicMember', async (req,res)=>{
+// input: academicMemberID / courseName / slotID
+router.post('/slotAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
-   // fac.departments;
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.member.memberID))
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
     {
-        return res.status(401).send("You are not an instructor for this course!");
+        return res.status(401).send("You are not authorized to modify this course!");
+    }
+    // checking that the TA is of same department && from course staff
+    const TA =await MemberModel.findOne({memberId: req.body.memberID});
+    if(TA.departmentName != departmentName)
+    {
+        return res.status(406).send("Not accepted to assign an academic member from another department!");
+    }
+    if(!isTAOfCourse(course,TA.memberID))
+    {
+        return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
     course.courseSchedule.forEach((slot,idx)=>{
         if(slot.slotID == req.body.slotID)
         {
             if(slot.assignedMemberID)
             {
-               return res.status(401).send("Cannot change already assigned slot!");
+               return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
             }
             course.courseSchedule[idx]={
                 slotID: slot.slotID,
@@ -198,7 +182,7 @@ router.post('/assignAcademicMember', async (req,res)=>{
                 time: slot.time,
                 location: slot.location,
                 assignedMemberID: req.body.assignedMemberID,
-                assignedMemberName: req.body.assignedMemberID
+                assignedMemberName: req.body.assignedMemberName
             };
             // update the schedule of this member ---> adding this slot to it
             const member = await MemberModel.findOne({memberID: req.body.assignedMemberID});
@@ -208,6 +192,12 @@ router.post('/assignAcademicMember', async (req,res)=>{
                 location:slot.location,
                 courseName:course.courseName
             };
+            // check if there are collisions in the member's schedule
+            const collisionSlot = member.schedule.find(slot => slot.day == tailoredSlot.day && slot.time == tailoredSlot.time)
+            if(collisionSlot)
+            {
+                return res.status(406).send("This academic member has another course slot at this timing!");
+            }
             member.schedule.push(tailoredSlot);
             await member.save();
         }
@@ -227,31 +217,32 @@ router.post('/assignAcademicMember', async (req,res)=>{
     await fac.save();
 });
 
-
-router.delete('/assignAcademicMember', async (req,res)=>{
+// input:  courseName / slotID
+router.delete('/slotAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
-   // fac.departments;
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.member.memberID))
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
     course.courseSchedule.forEach((slot,idx)=>{
         if(slot.slotID == req.body.slotID)
         {
-            // if(!slot.assignedMemberID)
-            // {
-            //     return res.status(401).send("This slot is already unassigned!");
-            // }
+            if(!slot.assignedMemberID)
+            {
+                // return res.status(406).send("This slot is already unassigned!");
+                // or
+                // return res.send();
+            }
             const oldAssignedMemberID = slot.assignedMemberID;
             course.courseSchedule[idx]={
                 slotID: slot.slotID,
@@ -264,8 +255,7 @@ router.delete('/assignAcademicMember', async (req,res)=>{
             // update the schedule of this member ---> adding this slot to it
             const member = await MemberModel.findOne({memberID: oldAssignedMemberID});
             member.schedule = member.schedule.filter((memSlot)=>{
-                return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName );
-                
+                return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName );                
             });
             await member.save();
         }
@@ -287,47 +277,60 @@ router.delete('/assignAcademicMember', async (req,res)=>{
 
 
 //update
-// input slotID & newMember
-router.put('/assignAcademicMember', async (req,res)=>{
+// input slotID & courseName & newMember
+router.put('/slotAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.role != "instructor")
+    if(req.signedMember.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.member.facultyName;
-    const departmentName = req.member.departmentName;
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
-   // fac.departments;
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.member.memberID))
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
     {
         return res.status(401).send("You are not an instructor for this course!");
+    }
+    // checking that the TA is of same department && from course staff
+    const TA =await MemberModel.findOne({memberId: req.body.memberID});
+    if(TA.departmentName != departmentName)
+    {
+        return res.status(406).send("Not accepted to assign an academic member from another department!");
+    }
+    if(!isTAOfCourse(course,TA.memberID))
+    {
+        return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
     course.courseSchedule.forEach((slot,idx)=>{
         if(slot.slotID == req.body.slotID)
         {
             if(!slot.assignedMemberID)
             {
-                return res.status(401).send("This slot is already unassigned!");
+                //return res.status(401).send("This slot is already unassigned!");
+                //or
+                //do nothing
             }
-            const oldAssignedMemberID = slot.assignedMemberID;
+            else
+            {
+                const oldAssignedMemberID = slot.assignedMemberID;
+                // update the schedule of old member ---> removing this slot to it
+                const oldMember = await MemberModel.findOne({memberID: oldAssignedMemberID});
+                oldMember.schedule = oldMember.schedule.filter((memSlot)=>{
+                return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName ); 
+                });
+                await oldMember.save();
+            }
             course.courseSchedule[idx]={
                 slotID: slot.slotID,
                 day: slot.day,
                 time: slot.time,
                 location: slot.location,
                 assignedMemberID: req.body.assignedMemberID,
-                assignedMemberName: req.body.assignedMemberID
+                assignedMemberName: req.body.assignedMemberName
             };
-            // update the schedule of old member ---> removing this slot to it
-            const oldMember = await MemberModel.findOne({memberID: oldAssignedMemberID});
-            oldMember.schedule = oldMember.schedule.filter((memSlot)=>{
-                return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName );
-                
-            });
-            await oldMember.save();
             // update the schedule of new member ---> adding this slot to it
             const newMember = await MemberModel.findOne({memberID: req.body.assignedMemberID});
             const tailoredSlot = {
@@ -336,6 +339,12 @@ router.put('/assignAcademicMember', async (req,res)=>{
                 location:slot.location,
                 courseName:course.courseName
             };
+            // check if there are collisions in the member's schedule
+            const collisionSlot = member.schedule.find(slot => slot.day == tailoredSlot.day && slot.time == tailoredSlot.time)
+            if(collisionSlot)
+            {
+                return res.status(406).send("This academic member has another course slot at this timing!");
+            }
             newMember.schedule.push(tailoredSlot);
             await newMember.save();
         }
@@ -355,223 +364,249 @@ router.put('/assignAcademicMember', async (req,res)=>{
     await fac.save();
 });
 
-router.delete("/AssignCourseTA", async(req,res,next)=>{
-
-    // dont forget to check the memberRank should be instructor and check the department of the TA to be the same as department of Instructor in the Line Below 
-    
-    memberSchema.findOne({memberId:req.body.memberId},(err,doc)=>{if(err){res.send(err)}; console.log(doc)}).then(async(memberRecord)=>{
-        
-         if (memberRecord)
-            { // U should check that the HOd department and the department the course is in 
-                 CourseSchema.findOne({courseName:req.body.courseName}).then (async(CourseRecord)=>{
-                console.log(CourseRecord)
-                if(CourseRecord)
-                    {
-                       const foundRecord=CourseRecord.instructors.filter((value,index)=>{return value.memberId==memberRecord.memberId})
-                       console.log(foundRecord)
-                        if(foundRecord.length==1)
-                        {    
-                            var NewInstructorData=CourseRecord.instructors.filter((value,index)=>{return value.memberId!=memberRecord.memberId})
-                                CourseSchema.findOneAndUpdate(
-                                    {courseName:req.body.courseName},
-                                    {instructors:NewInstructorData},
-                                     {new: true}
-                                ).then((doc) => {
-                                    console.log(doc);
-                                    res.send(doc)
-                                  }).catch((err)=>{res.send(err)})
-    
-                        }
-                        else
-                        {res.send("The Instructor u want to delete is not assigned this course to be deleted from him/her")}
-                    }
-                    else{res.send("Course data not present in Database")}
-    
-        
-                 }).catch((err)=>{res.send(err)})
-    
-            }
-            else{res.send("Member data not present in Database")
-        
-    
-        }
-    
-    
-            })
-        })
-
-
-router.post('/deleteLocation', async (req,res)=>{
-  
-    Location.findOneAndDelete(
-        {locationName: req.body.locationName})
-             
-        .then((doc) => {
-            console.log(doc);
-            res.send(doc)
-          })
-          .catch((err) => {
-              console.error(err);
-              res.send(err)
-        }
-    );
-});
-
-// Faculty manipulation
-router.post('/addFaculty', async (req,res)=>{
-    const faculty= await new Faculty({
-        facultyName:req.body.facultyName,
-        deanName:req.body.deanName,
-    });
-    faculty.save().then((data)=>{
-        res.send(data);
-        console.log(data);
-    }).catch((error)=>{
-        res.json(error);
-        console.log(error);
-    });
-})
-
-router.post('/updateFaculty', async (req,res)=>{
-  
-    // Find and update Faculty on facultyName
-    Faculty.findOneAndUpdate(
-        {facultyName: req.body.facultyNameOld},
+// input: academicMemberID / courseName
+router.post('/courseAcadMember', async (req,res)=>{
+    // getting the member requesting this get from the data base by the token
+    // and putting it in a variable  req.member using middleware
+    if(req.signedMember.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
+    const fac =await FacultyModel.findOne({facultyName: facultyName});
+    const department = fac.departments.find(dep => dep.departmentName == departmentName);
+    const course = department.courses.find(course => course.courseName == req.body.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    {
+        return res.status(401).send("You are not authorized to modify this course!");
+    }
+    // checking that the TA is of same department
+    const TA =await MemberModel.findOne({memberId: req.body.memberID});
+    if(TA.departmentName != departmentName)
+    {
+        return res.status(406).send("Not accepted to assign an academic member from another department!");
+    }
+    if(isTAOfCourse(course,TA.memberID))
+    {
+        //return res.status(406).send("Not accepted! This academic member is already assigned");
+        //or
+        //return res.status(200).send();
+    }
+    const tailoredTA = {
+        id: TA.memberID,
+        name: TA.name,
+        mail: TA.email,
+        office: TA.officeLocation
+    };
+    course.TAs.push(tailoredTA);
+    department.courses.forEach((courseItem,idx)=>{
+        if(courseItem.courseName == course.courseName)
         {
-            // For values you don't wish to change enter the old value
-            facultyName:req.body.facultyNameNew,
-            deanName:req.body.deanName
-        },
-        { new: true },)
-        
-        .then((doc) => {
-            console.log(doc);
-            res.send(doc)
-          })
-          .catch((err) => {
-              console.error(err);
-              res.send(err)
+            department.courses[idx]=course;
         }
-    );
+    });
+    fac.departments.forEach((dep,idx)=>{
+        if(dep.departmentName == department.departmentName)
+        {
+            fac.departments[idx] = department
+        }
+    });
+    await fac.save();
 });
 
-router.post('/deleteFaculty', async (req,res)=>{
-  
-    // Find and delete Faculty on facultyName
-    Faculty.findOneAndDelete(
-        {facultyName: req.body.facultyName})
-             
-        .then((doc) => {
-            console.log(doc);
-            res.send(doc)
-          })
-          .catch((err) => {
-              console.error(err);
-              res.send(err)
+// input:  courseName / memberID
+router.delete('/courseAcadMember', async (req,res)=>{
+    // getting the member requesting this get from the data base by the token
+    // and putting it in a variable  req.member using middleware
+    if(req.signedMember.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
+    const fac =await FacultyModel.findOne({facultyName: facultyName});
+    const department = fac.departments.find(dep => dep.departmentName == departmentName);
+    const course = department.courses.find(course => course.courseName == req.body.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    {
+        return res.status(401).send("You are not an instructor for this course!");
+    }
+    // checking that the TA is of same department
+    const TA =await MemberModel.findOne({memberId: req.body.memberID});
+    if(!isTAOfCourse(course,TA.memberID))
+    {
+        //return res.status(406).send("Not accepted! Not a staff member already");
+        //or
+        //return res.status(200).send();
+    }
+    course.TAs = course.TAs.filter(t => {
+        return !(t.id == TA.memberID && t.name == TA.name && t.mail == TA.email && t.office == TA.officeLocation);
+    });
+    department.courses.forEach((courseItem,idx)=>{
+        if(courseItem.courseName == course.courseName)
+        {
+            department.courses[idx]=course;
         }
-    );
+    });
+    fac.departments.forEach((dep,idx)=>{
+        if(dep.departmentName == department.departmentName)
+        {
+            fac.departments[idx] = department
+        }
+    });
+    await fac.save();
 });
 
-// Department within Faculty manipulation
-router.post('/addDepartment', async (req,res)=>{
-    
-    // Find the Faculty
-    Faculty.findOne(
-        {facultyName: req.body.facultyName})
-             
-        .then(async (doc) => {
-            // Create Department
-            const department= await new Department({
-                departmentName:req.body.departmentName,
-                headID:req.body.headID,
-                headName:req.body.headName,
-            });
-            // Add Faculty to the Department
-            doc.departments.push(department);
-            // Save the faculty
-            doc.save()
-            .then((doc) => {
-                console.log(doc);
-                res.send(doc)
-              })
-              .catch((err) => {
-                  console.error(err);
-                  res.send(err)
-            }
-        );
 
-
-          })
-          .catch((err) => {
-              console.error(err);
-              res.send(err)
+// input: academicMemberID / courseName
+router.post('/courseCoordinator', async (req,res)=>{
+    // getting the member requesting this get from the data base by the token
+    // and putting it in a variable  req.member using middleware
+    if(req.signedMember.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
+    const fac =await FacultyModel.findOne({facultyName: facultyName});
+    const department = fac.departments.find(dep => dep.departmentName == departmentName);
+    const course = department.courses.find(course => course.courseName == req.body.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    {
+        return res.status(401).send("You are not authorized to modify this course!");
+    }
+    // checking that the TA is of same department && from course staff
+    const TA =await MemberModel.findOne({memberId: req.body.memberID});
+    if(TA.departmentName != departmentName)
+    {
+        return res.status(406).send("Not accepted! The academic member is from another department");
+    }
+    if(!isTAOfCourse(course,TA.memberID))
+    {
+        return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
+    }
+    if(course.coordinatorID)
+    {
+        return res.status(406).send("Not accepted! This course already has a coordinator, you should remove him/her first");
+    }
+    TA.MemberRank = "coordinator";
+    await TA.save();
+    course.coordinatorID = TA.memberID;
+    course.coordinatorName = TA.name;
+    department.courses.forEach((courseItem,idx)=>{
+        if(courseItem.courseName == course.courseName)
+        {
+            department.courses[idx]=course;
         }
-    );
-})
-
-router.post('/updateDepartment', async (req,res)=>{
-    
-    // Find the Faculty
-    Faculty.findOne(
-        {facultyName: req.body.facultyName})
-             
-        .then(async (doc) => {
-            // Find Department
-            var index
-            var flag = false;
-            for(i in doc.departments){
-                if(doc.departments[i].departmentName === req.body.departmentNameOld){
-                    flag = true;
-                    // For values you don't wish to change enter the old value
-                    doc.departments[i].departmentName = req.body.departmentNameNew;
-                    doc.departments[i].headID = req.body.headID;
-                    doc.departments[i].headName = req.body.headName;
-                    
-                    // Save department with updated values
-                    doc.save();
-                    break;
-                }
-            }
-            console.log(doc);
-            res.send(doc);
-          })
-          .catch((err) => {
-              console.error(err);
-              res.send(err)
+    });
+    fac.departments.forEach((dep,idx)=>{
+        if(dep.departmentName == department.departmentName)
+        {
+            fac.departments[idx] = department
         }
-    );
-})
+    });
+    await fac.save();
+});
 
-router.post('/deleteDepartment', async (req,res)=>{
-    
-    // Find the Faculty
-    Faculty.findOne(
-        {facultyName: req.body.facultyName})
-             
-        .then(async (doc) => {
-            // Find Department
-            var index
-            var flag = false;
-            for(i in doc.departments){
-                if(doc.departments[i].departmentName === req.body.departmentName){
-                    flag = true;
-                    
-                    // Remove Department
-                    doc.departments.splice(i, 1);
-                    
-                    // Save Faculty without Department
-                    doc.save();
-                    break;
-                }
-            }
-            console.log(doc);
-            res.send(doc);
-          })
-          .catch((err) => {
-              console.error(err);
-              res.send(err)
+// input:  courseName
+router.delete('/courseCoordinator', async (req,res)=>{
+    // getting the member requesting this get from the data base by the token
+    // and putting it in a variable  req.member using middleware
+    if(req.signedMember.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
+    const fac =await FacultyModel.findOne({facultyName: facultyName});
+    const department = fac.departments.find(dep => dep.departmentName == departmentName);
+    const course = department.courses.find(course => course.courseName == req.body.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    {
+        return res.status(401).send("You are not an instructor for this course!");
+    }
+    if(!course.coordinatorID)
+    {
+        //return res.status(406).send("Already no coordinator assigned!");
+        //or
+        //do nothing
+        //res.status(200).send();
+    }
+    const TA =await MemberModel.findOne({memberID: course.coordinatorID});
+    TA.MemberRank = "TA";
+    await TA.save();
+    course.assignedMemberID=null;
+    course.assignedMemberName=null;
+    department.courses.forEach((courseItem,idx)=>{
+        if(courseItem.courseName == course.courseName)
+        {
+            department.courses[idx]=course;
         }
-    );
-})
+    });
+    fac.departments.forEach((dep,idx)=>{
+        if(dep.departmentName == department.departmentName)
+        {
+            fac.departments[idx] = department
+        }
+    });
+    await fac.save();
+});
+
+
+//update
+// input courseName & newMember
+router.put('/courseCoordinator', async (req,res)=>{
+    // getting the member requesting this get from the data base by the token
+    // and putting it in a variable  req.member using middleware
+    if(req.signedMember.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
+    const fac =await FacultyModel.findOne({facultyName: facultyName});
+    const department = fac.departments.find(dep => dep.departmentName == departmentName);
+    const course = department.courses.find(course => course.courseName == req.body.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    {
+        return res.status(401).send("You are not an instructor for this course!");
+    }
+    // checking that the TA is of same department && from course staff
+    const TA =await MemberModel.findOne({memberId: req.body.memberID});
+    if(TA.departmentName != departmentName)
+    {
+        return res.status(406).send("Not accepted! the academic member is from another department");
+    }
+    if(!isTAOfCourse(course,TA.memberID))
+    {
+        return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
+    }
+    if(course.coordinatorID)
+    {
+        const oldTA =await MemberModel.findOne({memberID: course.coordinatorID});
+        oldTA.MemberRank = "TA";
+        await oldTA.save();
+    }
+    TA.MemberRank = "coordinator";
+    await TA.save();
+    course.coordinatorID = TA.memberID;
+    course.coordinatorName = TA.name;
+    department.courses.forEach((courseItem,idx)=>{
+        if(courseItem.courseName == course.courseName)
+        {
+            department.courses[idx]=course;
+        }
+    });
+    fac.departments.forEach((dep,idx)=>{
+        if(dep.departmentName == department.departmentName)
+        {
+            fac.departments[idx] = department
+        }
+    });
+    await fac.save();
+});
+
+
 
 module.exports=router;
