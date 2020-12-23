@@ -534,7 +534,7 @@ router.delete('/courseCoordinator', async (req,res)=>{
         //res.status(200).send();
     }
     const TA =await MemberModel.findOne({memberID: course.coordinatorID});
-    TA.MemberRank = "TA";
+    TA.MemberRank = "ta";
     await TA.save();
     course.assignedMemberID=null;
     course.assignedMemberName=null;
@@ -585,7 +585,7 @@ router.put('/courseCoordinator', async (req,res)=>{
     if(course.coordinatorID)
     {
         const oldTA =await MemberModel.findOne({memberID: course.coordinatorID});
-        oldTA.MemberRank = "TA";
+        oldTA.MemberRank = "ta";
         await oldTA.save();
     }
     TA.MemberRank = "coordinator";
