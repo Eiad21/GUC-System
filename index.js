@@ -1,9 +1,18 @@
 const mongoose = require('mongoose');
+//const { slotSchema } = require('./models/slotSchema');
 const app = require('./app').app;
 const courseschema = require('./models/CourseSchema').constructor
+<<<<<<< Updated upstream
 const departmentSchema= require("./models/departmentSchema").constructor
 const memberSchema = require("./models/memberSchema").constructor
 
+=======
+const memberSchema = require('./models/memberSchema').constructor
+const slotSchema = require('./models/slotSchema').constructor
+const authoController = require('./controllers/authoController').constructor
+
+console.log("everything is working");
+>>>>>>> Stashed changes
 const connectionParams={
     useNewUrlParser:true,
     useCreateIndex:true,
@@ -22,6 +31,75 @@ mongoose.connect(url,connectionParams).then(()=>{
 }).catch(()=>{
     console.log("error in database connection");
 }); 
+/*
+
+    let slot1=new slotSchema({
+        day:"saturday",
+        time:"3",
+        location:"c4",
+        courseName:"csen"
+    });
+    let member1=new memberSchema(
+        {
+            name:"abdullah",
+            gender:"male",
+            memberId:"14843",
+            Facultyname:"engineering",
+            department:"cs",
+            email:"abdullahesham",
+            password:"123",
+            salary:1000,
+            officeLocation:"c4",
+            schedule:[slot1]
+        } 
+        );
+        let member2=new memberSchema(
+            {
+                name="eiad",
+                gender="male",
+                memberId="10701",
+                Facultyname="engineering",
+                department="cs",
+                password="123",
+                salary=2000,
+                officeLocation="c4",
+                schedule=[new slotSchema({
+                    day="saturday",
+                    time="4",
+                    location="c4",
+                    courseName="csen"
+                })]
+            } 
+            )
+
+            let member3=new memberSchema(
+                {
+                    name="karim",
+                    gender="male",
+                    memberId="8922",
+                    Facultyname="engineering",
+                    department="cs",
+                    password="123",
+                    salary=3000,
+                    officeLocation="c4",
+                    schedule=[new slotSchema({
+                        day="saturday",
+                        time="5",
+                        location="c4",
+                        courseName="csen"
+                    })]
+                } 
+                )
+*/
+
+//  member1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)});
+
+ // slot1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)});
+
+ // member2.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
+ // member3.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
+
+
 //  let loc1=new locationSchema
 //  (
 //     {
