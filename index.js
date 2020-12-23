@@ -2,17 +2,13 @@ const mongoose = require('mongoose');
 //const { slotSchema } = require('./models/slotSchema');
 const app = require('./app').app;
 const courseschema = require('./models/CourseSchema').constructor
-<<<<<<< Updated upstream
 const departmentSchema= require("./models/departmentSchema").constructor
-const memberSchema = require("./models/memberSchema").constructor
 
-=======
 const memberSchema = require('./models/memberSchema').constructor
 const slotSchema = require('./models/slotSchema').constructor
-const authoController = require('./controllers/authoController').constructor
+//const authoController = require('./controllers/authoController').constructor
 
 console.log("everything is working");
->>>>>>> Stashed changes
 const connectionParams={
     useNewUrlParser:true,
     useCreateIndex:true,
