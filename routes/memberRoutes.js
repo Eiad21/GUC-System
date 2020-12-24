@@ -89,8 +89,66 @@ router.route('/viewProfile')
 }
     )
 
+router.route('/updateProfile')
+.get(async (req, res )=>{
+        
+    res.redirect('/updateProfile');
+}
+    )
+    router.route('/doneReturn')
+    .get(async (req, res )=>{
+            
+        res.redirect('/');
+    }
+        )
 
 
 
+ router.route('/updateEmail')
+    .put(async (req, res )=>{
+ 
+        memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
+            
+                if(!err)
+                mem.name = request.body.name;
+               else res.send("error user not found"+err);
+                }
+                );
+            }
+        
+    
+        )
 
+        router.route('/updateEmail')
+        .put(async (req, res )=>{
+     
+            memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
+                
+                    if(!err)
+                    mem.name = request.body.name;
+                   else res.send("error user not found"+err);
+                    }
+                    );
+                }
+            
+        
+            )
+ 
+router.route('/updatePassword')
+    .put(async (req, res )=>{
+        if(! req.body.password){
+            res.send('You must sign up with password')
+        }
+        memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
+            const salt= await bcrypt.genSalt(10)
+            let temp= await bcrypt.hash(req.body.password, salt) 
+                if(!err)
+                mem.password = temp;
+               else res.send("error user not found"+err);
+                }
+                );
+            }
+        
+    
+        )
 module.exports=router
