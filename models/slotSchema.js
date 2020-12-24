@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 
 const slotSchema=mongoose.Schema(
- {   
+ {
 
     day:{type:String, // not sure about the type
         required:true,
