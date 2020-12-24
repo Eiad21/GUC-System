@@ -10,7 +10,19 @@ const attendanceSchema=mongoose.Schema({
     date:{type:Date,
       required:true,
     },
-    sessions:[signInSessionSchema]  
+    sessions:[signInSessionSchema],
+    missingHours:
+    {
+      type:Number
+    },
+    extraHours:
+    {
+      type:Number
+    },
+    missedDay:
+    {
+      type:Boolean
+    } 
   
   })
 
