@@ -54,7 +54,7 @@ var jwt =require(jsonwebtoken)
 
 ///////////////////////////////////////////////////////
 router.route('/logOut')
-.get(async (req, res,next)=>{
+.get(async (req, res)=>{
     
   res.cookie('jwt','',{maxAge:1});
   res.redirect('/');
@@ -78,10 +78,16 @@ router.route('/logOut')
 //     }
 // }
 
+///////////////////////////////////
 
 
-
-
+router.route('/viewProfile')
+.get(async (req, res )=>{
+    
+    res.redirect('/profile');
+    res.send(req.header.token);
+}
+    )
 
 
 
