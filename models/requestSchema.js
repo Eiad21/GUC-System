@@ -57,7 +57,12 @@ const requestSchema=mongoose.Schema({
     },
 
     //in case slot linking request
-    slot:[slotSchema]
+    slotCourse:{
+        type:String
+    },
+    slotId:{
+        type:String
+    }
 })
 
   module.exports.requestModel = mongoose.model('Request',requestSchema);
