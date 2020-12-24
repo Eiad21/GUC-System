@@ -7,7 +7,6 @@ const slotSchema = require("../models/slotSchema").constructor
 const bcrypt =require('bcryptjs')
 // const { jsonwebtoken } = require('jsonwebtoken')
 var jwt =require(jsonwebtoken)
-
 // router.route('/login').get(async(req, res)=>{
 
 // const {email, password}=req.body
@@ -17,8 +16,8 @@ var jwt =require(jsonwebtoken)
 //  )
 
 
-
- router.route('/login')
+//////////////////////////////////////////////////
+ router.route('/logIn')
 .post(async (req, res)=>{
     const user= await memberSchema.findOne({email : req.body.email})
     if(user == null){
@@ -53,11 +52,31 @@ var jwt =require(jsonwebtoken)
     res.header('auth-token', token).send(token)
 })
 
+///////////////////////////////////////////////////////
+router.route('/logOut')
+.get(async (req, res,next)=>{
+    
+  res.cookie('jwt','',{maxAge:1});
+  res.redirect('/');
+}
+    )
 
 
-
-
-
+module.exports= (req, res, next)=>{
+    const token= req.headers.token
+    if(!token)  
+    {
+        res.status(401).status('Access deined')
+    }
+    try{
+        const verified= jwt.verify(token, process.env.TOKEN_SECRET)
+        req.user= verified
+        next()
+    }
+    catch(err){
+        res.status(400).send('Invalid Request')
+    }
+}
 
 
 
