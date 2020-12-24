@@ -8,7 +8,7 @@ const memberSchema = require('./models/memberSchema').constructor
 const slotSchema = require('./models/slotSchema').constructor
 //const authoController = require('./controllers/authoController').constructor
 
-console.log("everything is working");
+//console.log("everything is working");
 const connectionParams={
     useNewUrlParser:true,
     useCreateIndex:true,
@@ -145,28 +145,43 @@ mongoose.connect(url,connectionParams).then(()=>{
 //    } 
 //     )
 
-// let course1=new courseschema
-// ( {courseName:"Csen502",
-//   coverage:75,
+let course1=new courseschema
+( {courseName:"Csen503",
+  coverage:75,
   
 
-//   coordiantorID:4,
-//   coordinatorName:"Kimo",
-//   instructors:[member1],
-//   TAs:[member2],
-//   courseSchedule:[]
-// }
-// )
+  coordiantorID:4,
+  coordinatorName:"Kimo",
+  instructors:[],
+  TAs:[],
+  courseSchedule:[]
+}
+)
  //course1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 
 
 
 // const department1=new departmentSchema({
-//     departmentName:"CS",
-//     headID:1,
+//     departmentName:"koftaaa11",
+//     headID:3,
 //     headName:"Kimo",
 //     courses:[course1],
-//     staff:[member2,member1]
+//     staff:[{
+//         id:6,
+//         name:"dasdds",
+//         mail:"email5@yahoo.com",
+//         office:"c7-202",
+//         dayoff:"Sunday"
+//       },
+//       {
+//         id:7,
+//         name:"dasdds",
+//         mail:"email24@yahoo.com",
+//         office:"c7-2020",
+//         dayoff:"Monday"
+//       }
+    
+//     ]
 //    });
 //   department1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 //  slot1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})

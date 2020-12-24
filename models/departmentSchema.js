@@ -33,6 +33,10 @@ const departmentSchema=new mongoose.Schema({
         office:{
           type:String,
           required:true
+        },
+        dayoff:{
+          type:String,
+          required:true
         }
       }]
   });
