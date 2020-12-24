@@ -8,7 +8,7 @@ const memberSchema = require('./models/memberSchema').constructor
 const slotSchema = require('./models/slotSchema').constructor
 //const authoController = require('./controllers/authoController').constructor
 
-//console.log("everything is working");
+console.log("everything is working");
 const connectionParams={
     useNewUrlParser:true,
     useCreateIndex:true,
@@ -18,8 +18,8 @@ const connectionParams={
 
 // const url="mongodb+srv://abdoolelcool:<password>@cluster0.vf8uu.mongodb.net/<dbname>?retryWrites=true&w=majority"
 // const url="mongodb+srv://sawan:7777777o@cluster0.d4j6s.mongodb.net/TheSawanDB?retryWrites=true&w=majority"
- const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
-//const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
+// const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
+const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
 
 
 mongoose.connect(url,connectionParams).then(()=>{
@@ -145,43 +145,28 @@ mongoose.connect(url,connectionParams).then(()=>{
 //    } 
 //     )
 
-let course1=new courseschema
-( {courseName:"Csen503",
-  coverage:75,
+// let course1=new courseschema
+// ( {courseName:"Csen502",
+//   coverage:75,
   
 
-  coordiantorID:4,
-  coordinatorName:"Kimo",
-  instructors:[],
-  TAs:[],
-  courseSchedule:[]
-}
-)
+//   coordiantorID:4,
+//   coordinatorName:"Kimo",
+//   instructors:[member1],
+//   TAs:[member2],
+//   courseSchedule:[]
+// }
+// )
  //course1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 
 
 
 // const department1=new departmentSchema({
-//     departmentName:"koftaaa11",
-//     headID:3,
+//     departmentName:"CS",
+//     headID:1,
 //     headName:"Kimo",
 //     courses:[course1],
-//     staff:[{
-//         id:6,
-//         name:"dasdds",
-//         mail:"email5@yahoo.com",
-//         office:"c7-202",
-//         dayoff:"Sunday"
-//       },
-//       {
-//         id:7,
-//         name:"dasdds",
-//         mail:"email24@yahoo.com",
-//         office:"c7-2020",
-//         dayoff:"Monday"
-//       }
-    
-//     ]
+//     staff:[member2,member1]
 //    });
 //   department1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 //  slot1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})

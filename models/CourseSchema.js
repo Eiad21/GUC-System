@@ -13,7 +13,7 @@ const courseSchema=mongoose.Schema({
     type:Number,
     required:true
   },
-  coordiantorID:{
+  coordinatorID:{
     type:String,
     required:true
   },
@@ -61,6 +61,8 @@ const courseSchema=mongoose.Schema({
   }],
   courseSchedule:[courseSlotSchema]
 })
+
+
 
   module.exports.constructor = mongoose.model('course',courseSchema);
   module.exports.courseSchema = courseSchema

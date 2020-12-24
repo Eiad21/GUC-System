@@ -6,7 +6,7 @@ const facultySchema=new mongoose.Schema({
             {type:String,
             required:true,
             },
-    deanName:
+    deanID:
             {type:String,
             required:true,
             },

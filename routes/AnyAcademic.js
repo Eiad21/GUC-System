@@ -6,6 +6,7 @@ const Slot = require("../models/slotSchema").constructor
 const Member = require("../models/memberSchema").constructor
 const Request = require("../models/requestSchema").requestModel
 const Course = require("../models/CourseSchema").constructor
+const Department = require("../models/departmentSchema").constructor
 
 
 app.use(express.json());
@@ -85,41 +86,19 @@ app.get('/replacementReq',async(req,res)=>{
 
 app.post('/slotLinkReq',async(req,res)=>{
     try{
-        let {reason,content,comment,slotId,slotCourse}=req.body;
+        let {reason,content,comment,slotDay,slotTime,slotLoc,slotCourse}=req.body;
+        const slot=new Slot({
+            day:slotDay,
+            time:slotTime,
+            location:slotLoc,
+            courseName:slotCourse
+        })
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
         
-        if(!slotId){
-            return res.status(400).json({msg:"Slot Id is required"});
-        }
-        if(!slotCourse){
-            return res.status(400).json({msg:"Slot Course is required"});
-        }
-
         //query to get the course coordinator
         const course=await Course.findOne({courseName:slotCourse});
-
-        if(!course){
-            return res.status(400).json({msg:"Slot Course is not valid"});
-        }
-
-        const theSlot=course.courseSchedule.find({slotID:slotId});
-        
-        if(!theSlot){
-            return res.status(400).json({msg:"Slot is not valid"});
-        }
-        var clash = false;
-        for(i in user.schedule){
-            if(user.schedule[i].day === theSlot.day && user.schedule[i].time === theSlot.time){
-                clash=true;
-            }
-        }
-
-        if(clash){
-            return res.status(400).json({msg:"You already have a slot at the time"});
-        }
-
-        const reciever=course.courseName
+        const reciever=course.coordiantorID
 
         if(!reason){
             reason="";
@@ -140,8 +119,7 @@ app.post('/slotLinkReq',async(req,res)=>{
             type:"slot_linking",
             status:"pending",
             comment:comment,
-            slotId:slotId,
-            slotCourse:slotCourse
+            slot:slot
         })
         request.save().then((data)=>{
             res.json(data);
@@ -157,11 +135,12 @@ app.post('/changeDayOffReq',async(req,res)=>{
     try{
         let {reason,content,comment,newDayOff}=req.body;
 
+        //query to get the HOD
+        const dep=await Department.findOne({departmentName:user.department});
+        const reciever=dep.headID
+
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
-        
-        //query to get the department
-        const reciever=user.departmentName;
         
         if(!newDayOff){
             return res.status(400).json({msg:"New Day Off is required"});
@@ -281,8 +260,9 @@ app.post('/submitLeaves',async(req,res)=>{
         const user=await Member.findOne({_id:loggedinID});
         
 
-        //query to get the department
-        const reciever=user.departmentName;
+        //query to get the HOD
+        const dep=await Department.findOne({departmentName:user.department});
+        const reciever=dep.headID
 
 
         if(!type){

@@ -16,7 +16,8 @@ const memberSchema = mongoose.Schema({
     memberId:
     {
         type:String,
-        required:true,
+        unique:true,
+        required:true
     },
     
     FacultyName:
@@ -41,7 +42,7 @@ const memberSchema = mongoose.Schema({
 
     password:{
         type:String,
-        required:true,  
+        required:true,
 
     },
     salary:{
@@ -52,12 +53,9 @@ const memberSchema = mongoose.Schema({
     },
     MemberRank:
     {
-        type:String,
-        required:true
-    },
-    dayoff:
-    {
-        type:String
+        locationType:String,
+        
+
     },
     schedule:[slotSchema]
 });

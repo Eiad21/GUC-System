@@ -6,12 +6,18 @@ const locationSchema=mongoose.Schema(
     {
       type:String,
       required:true,
+      unique:true
     },
 
   capacity:
   {
     type:Number,
     required:true,
+  },
+
+  population:
+  {
+    type:Number
   },
 
   locationType:

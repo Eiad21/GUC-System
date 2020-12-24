@@ -3,7 +3,6 @@ var router = express.Router();
 const memberSchema = require("../models/memberSchema").constructor
 const CourseSchema = require("../models/CourseSchema").constructor
 const DepartmentSchema = require("../models/departmentSchema").constructor
-const requestSchema = require("../models/requestSchema").constructor
 // get all instructors
  router.get("/", async(req,res,next)=>{
 
@@ -22,7 +21,7 @@ memberSchema.find({Facultyname:"Pharmacy"},(err,user)=>{
  router.post("/AssignCourseInstructor", async(req,res,next)=>{
 
 // dont forget to check the memberRank should be instructor and check the department of the instructor to be the same as department of HOD in the Line Below 
-    memberSchema.findOne({memberId:req.body.memberId},(err,doc)=>{if(err){res.statusCode=404; res.send(err)}; console.log(doc)}).then(async(memberRecord)=>{
+    memberSchema.findOne({memberId:req.body.memberId},(err,doc)=>{if(err){res.send(err)}; console.log(doc)}).then(async(memberRecord)=>{
     
      if (memberRecord)
         {
@@ -202,7 +201,7 @@ memberSchema.find({Facultyname:"Pharmacy"},(err,user)=>{
      //change this hardcoded id to the id of the HOd from Token
      await DepartmentSchema.findOne({headID:"1"})
      .then((doc)=>{
-         res.statusCode=200
+         console.log(doc.staff)
          res.send(doc.staff)
      })
  })
@@ -219,49 +218,7 @@ memberSchema.find({Facultyname:"Pharmacy"},(err,user)=>{
         
     })
 })
-
-router.get("/viewstaffdayoff",async(req,res)=>{
-    //check if iam a Hod using id from token
-     await DepartmentSchema.findOne({headID:"3"}).then((doc)=>{
-
-        var allstaffdayoffarray=[]
-        doc.staff.forEach((value)=>{allstaffdayoffarray.push({Name:value.name ,Mail:value.mail,DayOff:value.dayoff})})
-        if(allstaffdayoffarray!=[])
-         res.status(200).send(allstaffdayoffarray)
-         else(res.status(404).send("there is no Staff in Your department"))
-     }).catch((err)=>{res.status(404).send("Sorry you can not access this featuer because you are not a Head of any Department")})
-
-})
     
-
-
-router.get("/viewstaffdayoff/:StaffId",async(req,res)=>{
-    //check if iam a Hod using id from token
-     await DepartmentSchema.findOne({headID:"3"}).then((doc)=>{
-         var StaffDayOffArray=doc.staff.filter((value)=>{return value.id==req.params.StaffId})
-         
-         if(StaffDayOffArray.length==1)
-         res.status(200).send({Name:StaffDayOffArray[0].name ,Mail:StaffDayOffArray[0].mail, DayOff:StaffDayOffArray[0].dayoff})
-         else
-         {
-             res.status(404).send("this staff is not in your department")
-         }
-     }).catch((err)=>{res.status(404).send("Sorry you can not access this featuer because you are not a Head of any Department")})
-
-})
-
-
-router.get("/viewallrequest",async(req,res)=>{
-    //check if iam a Hod using id from token
-     await DepartmentSchema.findOne({headID:"3"}).then((doc)=>{
-         var allrequestinmydept=requestSchema.find({reciever:doc.depadepartmentName,type:"change_day_off6666666"||"leave"})
-         if(allrequestinmydept!=[])
-         res.status(200).send(allrequestinmydept)
-         else {res.status(404).send("there is no requests sent from any member in your department")}
-
-     }).catch((err)=>{res.status(404).send("Sorry you can not access this featuer because you are not a Head of any Department")})
-
-})
 
 
  module.exports=router;
