@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 
 const signInSessionSchema = mongoose.Schema({
     // which should be required
-    sessionId:  {
-        type: Number,
-        required:true
-        },
     timein:  {
     type: Date
     },
