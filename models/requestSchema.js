@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const {slotSchema} = require('./slotSchema');
 
 const requestSchema=mongoose.Schema({
-
     date:
     {
         type:Date
