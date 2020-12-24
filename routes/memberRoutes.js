@@ -52,4 +52,20 @@ var jwt =require(jsonwebtoken)
 }, process.env.TOKEN_SECRET)
     res.header('auth-token', token).send(token)
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports=router
