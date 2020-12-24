@@ -153,4 +153,28 @@ router.route('/updatePassword')
         
     
         )
+
+
+router.route('/signIn')
+  
+
+    .post(async (req, res )=>{
+
+
+
+    }
+                
+            
+)
+router.route('/signOut')
+  
+
+    .post(async (req, res )=>{
+        
+                    
+        
+    }
+                        
+                    
+)
 module.exports=router
