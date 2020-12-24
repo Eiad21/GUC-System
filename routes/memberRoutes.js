@@ -4,10 +4,9 @@ var router = express.Router();
 const memberSchema = require("../models/memberSchema").constructor
 const slotSchema = require("../models/slotSchema").constructor
 //const authoController =require("../controllers/authController")
-const bcrypt =require('bcryptjs')
+const bcrypt =require('bcryptjs');
 // const { jsonwebtoken } = require('jsonwebtoken')
-var jwt =require(jsonwebtoken)
-// router.route('/login').get(async(req, res)=>{
+const jwt= require('jsonwebtoken')// router.route('/login').get(async(req, res)=>{
 
 // const {email, password}=req.body
 
@@ -135,13 +134,16 @@ router.route('/updateProfile')
             )
  
 router.route('/updatePassword')
-    .put(async (req, res )=>{
+  
+
+.put(async (req, res )=>{
+    const salt= await  bcrypt.genSalt(10)
+    let temp= await  bcrypt.hash(req.body.password, salt) 
         if(! req.body.password){
             res.send('You must sign up with password')
         }
-        memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
-            const salt= await bcrypt.genSalt(10)
-            let temp= await bcrypt.hash(req.body.password, salt) 
+          memberSchema.findOne( {memberId: request.body.memberId}, function(err, mem) {
+           
                 if(!err)
                 mem.password = temp;
                else res.send("error user not found"+err);
