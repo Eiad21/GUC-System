@@ -12,19 +12,19 @@
 //         }
 
 
-//         let member=new memberSchema({
-//             name:req.body.name,
-//             gender:req.body.gender,
-//             memberId:req.body.memberId,
-//             Facultyname:req.body.Facultyname,
-//             department:req.body.department,
-//             email:req.body.email,
-//             password:hashedPass,
-//             salary:req.body.salary,
-//             officeLocation:req.body.officeLocation,
-//             schedule:req.body.schedule
+        //     member=new memberSchema({
+        //     name:req.body.name,
+        //     gender:req.body.gender,
+        //     memberId:req.body.memberId,
+        //     Facultyname:req.body.Facultyname,
+        //     department:req.body.department,
+        //     email:req.body.email,
+        //     password:hashedPass,
+        //     salary:req.body.salary,
+        //     officeLocation:req.body.officeLocation,
+        //     schedule:req.body.schedule
     
-//         })
+        // })
     
     
 //         member.save()
