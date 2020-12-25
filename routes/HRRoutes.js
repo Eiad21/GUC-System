@@ -9,10 +9,13 @@ const Member = require("../models/memberSchema").constructor
 const Attendance = require("../models/attendanceSchema").constructor
 const Counter = require("../models/counterSchema").constructor
 const Session = require("../models/signInSessionSchema").constructor
+require('dotenv').config()
 
 // HR Routes
 // Location manipulation
 router.post('/addLocation', async (req,res)=>{
+    console.log(process.env.TOKEN_SECRET);
+    return res.status(200).send();
     // if(!req.signedMember || req.signedMember.MemberRank != "hr"){
     //     return res.status(401).send("Access denied!");
     // }
