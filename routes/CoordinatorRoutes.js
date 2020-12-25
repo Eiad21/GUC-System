@@ -27,7 +27,7 @@ router.get('/viewSlotLinkingReqs', async (req,res)=>{
     const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberID);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     allRequests={};
     coursesCoordinated.forEach(async(course)=>{
@@ -51,7 +51,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
     const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberID);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     const slotLinkingReq = await RequestModel.findOne({reqID: req.body.reqID});
     if(!slotLinkingReq)
