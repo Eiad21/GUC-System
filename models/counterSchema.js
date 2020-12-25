@@ -13,10 +13,9 @@ const counterSchema=mongoose.Schema({
     {
         type:Number,
         required:true,
-    },
-    sessions:[signInSessionSchema]  
+    } 
   
   })
 
   module.exports.constructor = mongoose.model('counter',counterSchema);
-  module.exports.attendanceSchema = attendanceSchema
+  module.exports.counterSchema = counterSchema

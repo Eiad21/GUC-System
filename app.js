@@ -8,6 +8,7 @@ const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const memberRoutes=require('./routes/memberRoutes')
 
+
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use("/Hod",HODroutes);

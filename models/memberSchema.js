@@ -58,7 +58,8 @@ const memberSchema = mongoose.Schema({
     },
     MemberRank:
     {
-        locationType:String,
+        type:String,
+        required:true
         
 
     },
