@@ -6,6 +6,7 @@ const Department = require("../models/departmentSchema").constructor
 const Course = require("../models/CourseSchema").constructor
 const Member = require("../models/memberSchema").constructor
 const Attendance = require("../models/attendanceSchema").constructor
+const Session = require("../models/signInSessionSchema").constructor
 
 // HR Routes
 // Location manipulation
@@ -428,9 +429,12 @@ router.post('/addMember', async (req,res)=>{
 })
 
 router.post('/updateMemberDepartment', async (req,res)=>{
+    if(!req.body.memberId){
+        // bad request
+    }
     // Find the member
     Member.findOne(
-        {email: req.body.email})
+        {memberId: req.body.memberId})
         
         .then(async (doc) => {
             if(doc){
@@ -518,13 +522,15 @@ router.post('/updateMemberDepartment', async (req,res)=>{
 })
 
 router.post('/deleteMemberDepartment', async (req,res)=>{
+    if(!req.body.memberId){
+        //bad req
+    }
     // Find the member
     Member.findOneAndDelete(
-        {email: req.body.email})
+        {memberId: req.body.memberId})
         
         .then(async (doc) => {
             if(doc){
-                
                 const mem = doc;
     
                 // Find the member's faculty
@@ -569,11 +575,11 @@ router.post('/deleteMemberDepartment', async (req,res)=>{
                 })
                 //console.log(doc);
 
-                // Edit Member attributes
-                mem.FacultyName = req.body.facultyName;
-                mem.departmentName = req.body.departmentName;
-                // Save Member
-                mem.save();
+                // // Edit Member attributes
+                // mem.FacultyName = req.body.facultyName;
+                // mem.departmentName = req.body.departmentName;
+                // // Save Member
+                // mem.save();
 
             }
 
@@ -585,12 +591,56 @@ router.post('/deleteMemberDepartment', async (req,res)=>{
     );
 })
 
-router.post('/viewStaffAttendance', async (req,res)=>{
+router.post('/addNewSignRecord', async (req,res)=>{
+    // if(!req.signedMember || req.signedMember.MemberRank != "hr"){
+    //     return res.status(401).send("Access denied!");
+    // }
+    if(req.body.date){
+        Attendance.findOne({date:req.body.date, memberId:req.body.memberId})
+        .then((doc) =>{
+            if(!doc){
+                return res.status(404).send("Not found");
+            }
+            if(!req.body.sessionId){
+                return res.status(400).send("Bad request");
+            }
+            else{
+                const session = doc.sessions[req.body.sessionId-1];
+                if(req.body.signOut && !session.timeout){
+                    session.timeout = req.body.signOut;
+                }
+                else if(req.body.signIn && !session.timein){
+                    session.timein = req.body.signIn;
+                }
+                else{
+                    res.status(404).send("Not found");
+                }
 
+                doc.missingMinutes -= (session.timeout.getTime() - session.timein.getTime()) / (1000 * 60);
+
+                doc.save();
+            }
+        })
+        .catch((err) =>{
+            console.log(err);
+            res.send(err);
+        })
+        
+    }
+    else{
+        res.status(400).send("Bad request");
+    }
+})
+
+router.post('/viewStaffAttendance', async (req,res)=>{
+    
     Attendance.findOne(
         {memberId:req.body.memberId}
     )
     .then((doc) =>{
+        if(!doc){
+            //not found
+        }
         res.send(doc)
         console.log(doc)
     })
@@ -601,13 +651,27 @@ router.post('/viewStaffAttendance', async (req,res)=>{
 );
 })
 
+router.post('/viewMembersMissingTime', async (req,res)=>{
+    //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
+    //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
+    const membersIDsMissingTime = 
+        await Attendance.find( {$or: [{missedDay: true}, {missingMinutes: {$gt: 0}}]} ,{memberId:1, _id:0}).distinct('memberId');
+    
+    const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
+
+    console.log(membersMissingTime);
+    res.send(membersMissingTime);
+})
+
 router.post('/updateMemberSalary', async (req,res)=>{
 
     Member.findOne(
-        {memberId:req.body.memberId}
-    )
+        {memberId:req.body.memberId})
     .then((doc) =>{
         if(doc){
+            if(!req.body.salary){
+                //bad request
+            }
             doc.salary = req.body.salary;
             doc.save()
             .then((doc) =>{
@@ -617,15 +681,14 @@ router.post('/updateMemberSalary', async (req,res)=>{
             .catch((err) => {
                 console.error(err);
                 res.send(err)
-          }
-        );
+            });
         }
     })
     .catch((err) => {
         console.error(err);
         res.send(err)
-  }
-);
+    }
+    );
 })
 
 module.exports=router;
