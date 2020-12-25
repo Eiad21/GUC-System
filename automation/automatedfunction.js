@@ -142,6 +142,8 @@ setInterval(async function() {
 
 // function to add empty attendance record for all members every day
 
+// function to add empty attendance record for all members every day
+
 setInterval(async function() {
     let dateObj = new Date();
 
@@ -174,6 +176,6 @@ setInterval(async function() {
             await attendRecNew.save();
         }
     }
-},4000/*24 hours*/);
+},86400000/*24 hours*/);
 
 module.exports={}
