@@ -7,6 +7,8 @@ const slotSchema = require("../models/slotSchema").constructor
 const bcrypt =require('bcryptjs');
 // const { jsonwebtoken } = require('jsonwebtoken')
 const jwt= require('jsonwebtoken')// router.route('/login').get(async(req, res)=>{
+const attendanceSchema = require("../models/attendanceSchema").constructor
+const signInSessionSchema = require("../models/signInSessionSchema").constructor
 
 // const {email, password}=req.body
 
@@ -157,12 +159,45 @@ router.route('/updatePassword')
 
 router.route('/signIn')
   
-
+//  member1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)});
     .post(async (req, res )=>{
+        let dateObj = new Date();
 
+        let temp =new signInSessionSchema({timein:dateObj 
+        });
+
+        let month = dateObj.getUTCMonth() ; //months from 1-12
+        let day = dateObj.getUTCDate();
+        let year = dateObj.getUTCFullYear();
+        let dateoz = new Date(year,month,day);
+
+        const sess =attendanceSchema.findOne(function(elem){
+            return elem.date==datoz && elem.memberId==req.body.memberId;
+        });
+        if(!sess){
+            console.log('day added')
+
+            let temp2=new attendanceSchema({
+                memberId:req.body.memberId,
+                date:dateoz,
+                sessions:[temp],
+                missingMinutes:120,
+                missedDay:true
+
+            });
+
+            attendanceSchema.push(temp2);
+            res.send(temp2);
+        }
+        else{
+            console.log('session added')
+            sess.sessions.push(temp);
+
+        }
 
 
     }
+
                 
             
 )
@@ -171,10 +206,155 @@ router.route('/signOut')
 
     .post(async (req, res )=>{
         
-                    
+           
+        
+
+
+
+
+
+        let dateObj = new Date();
+
+        let temp =new signInSessionSchema({timeout:dateObj 
+        });
+
+        let month = dateObj.getUTCMonth() ; //months from 1-12
+        let day = dateObj.getUTCDate();
+        let year = dateObj.getUTCFullYear();
+        let dateoz = new Date(year,month,day);
+
+        const sess =attendanceSchema.findOne(function(elem){
+            return elem.date==datoz && elem.memberId==req.body.memberId;
+        });
+        if(!sess){
+            console.log('day added')
+
+            let temp2=new attendanceSchema({
+                memberId:req.body.memberId,
+                date:dateoz,
+                sessions:[temp],
+                missingMinutes:120,
+                missedDay:true
+
+            });
+
+            attendanceSchema.push(temp2);
+            res.send(temp2);
+        }
+        else{
+            console.log('session added')
+            sess.sessions.push(temp);
+            
+            let len = sess.sessions.length-1; 
+                 if(! sess.sessions[len].timeout){
+                     const diffTime = Math.abs(dateObj - sess.sessions[len].timein);
+                     const diffMinutes = Math.ceil(diffTime / (1000 * 60  )); 
+                     console.log('time out added ')
+                     sess.sessions[len].timeout=dateObj;
+                     sess.missingMinutes=sess.missingMinutes-diffMinutes;
+                     res.send("time out added")
+                 } 
+
+                 else{
+                    sess.sessions.push(temp);
+                    res.send('time out slot added ') 
+                 }
+
+        }
+
+
+
+
+
+
+
+
+
         
     }
                         
                     
 )
+
+
+
+
+
+
+router.route('/viewAttendancee')
+  
+    .get(async (req, res )=>{
+        let dateObj = new Date();
+
+        let temp =new signInSessionSchema({timein:dateObj 
+        });
+
+        let month = dateObj.getUTCMonth() ; //months from 1-12
+        let day = dateObj.getUTCDate();
+        let year = dateObj.getUTCFullYear();
+        let dateoz = new Date(year,month,day);
+
+        const sess =attendanceSchema.filter(function(elem){
+            elem.memberId==req.body.memberId;
+        });
+        if(sess.length==0){
+            console.log('no attendance yet')
+
+            
+        }
+        else{
+            console.log('attendance list ')
+            res.send(sess)
+
+        }
+
+
+    }
+
+                
+            
+)
+
+
+
+
+
+
+
+
+
+
+
+/////// same method viewStuffAttendance
+router.post('/viewMyAttendance', async (req,res)=>{
+    
+    Attendance.findOne(
+        {memberId:req.body.memberId}
+    )
+    .then((doc) =>{
+        if(!doc){
+            //not found
+        }
+        res.send(doc)
+        console.log(doc)
+    })
+    .catch((err) => {
+        console.error(err);
+        res.send(err)
+  }
+);
+})
+//////////////////////////viewMembersMissingHoursAndExtraHours
+router.post('/viewMembersMissingHoursAndExtraHours', async (req,res)=>{
+    //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
+    //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
+    const membersIDsMissingTime = 
+        await Attendance.find( {$or: [{missedDay: true}, {missingMinutes: {$gt: 0}}]} ,{memberId:1, _id:0}).distinct('memberId');
+    
+    const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
+
+    console.log(membersMissingTime);
+    res.send(membersMissingTime);
+})
+
 module.exports=router
