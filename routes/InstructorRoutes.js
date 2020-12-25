@@ -138,6 +138,18 @@ router.get('/viewCourseStaff/:courseName', async (req,res)=>{
     if(!isInstructorOfCourse(course,/*req.signedMember.memberID*/"ac_7")){
         return res.status(401).send("Access denied!");
     }
+    const facultyName = req.signedMember.facultyName;
+    const departmentName = req.signedMember.departmentName;
+    const depCourses = getCoursesInDep(facultyName,departmentName);
+    const course = depCourses.find(course => course.courseName == req.params.courseName);
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+     {
+
+     }
+     const staffInfo = {
+        instructors: course.instructors,
+        TAs: course.TAs
+        };
     const staffInfo = {
         instructors: course.instructors,
         TAs: course.TAs
@@ -175,7 +187,7 @@ router.post('/slotAcadMember', async (req,res)=>{
         return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
     course.courseSchedule.forEach(async (slot,idx)=>{
-        if(slot.slotID == req.body.slotID)
+        if(slot._id == req.body.slotID)
         {
             if(slot.assignedMemberID)
             {

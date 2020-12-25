@@ -53,4 +53,40 @@ router.route('/logIn')
 
 ///////////////////////////////////////////////////////
 
+router.post('/addHr', async (req,res)=>{
+
+    var prefix = "hr-";
+    const num = await Counter.findOne({counterName:prefix});
+    if(!num){
+        const count = await new Counter({
+            counterName:"hr-",
+            counterCount:1
+        });
+        prefix+="1";
+        await count.save();
+    }
+    else{
+        res.status(401).send("1 or more HR members already exist in the database")
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPass = await bcrypt.hash("123456", salt);
+    console.log(prefix);
+    const member = await new Member({
+         name:"default default",
+         gender:"M",
+         memberId:"hr-1",
+         email:"default.default@guc.edu.eg",
+         password:hashedPass,
+         MemberRank:"hr"
+     });
+
+    member.save().then((data)=>{
+         res.send(data);
+         console.log(data);
+     }).catch((error)=>{
+         res.json(error);
+         console.log(error);
+     });
+})
+
 module.exports=router
