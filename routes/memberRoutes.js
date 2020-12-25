@@ -53,72 +53,73 @@ router.route('/logOut')
 router.route('/viewProfile')
 .get(async (req, res )=>{
     
-    res.redirect('/profile');
-    res.send(req.header.token);
+   // res.redirect('/profile');
+    res.send(req.user);
 }
     )
 
-router.route('/updateProfile')
-.get(async (req, res )=>{
+// router.route('/updateProfile')
+// .get(async (req, res )=>{
         
-    res.redirect('/updateProfile');
-}
-    )
-    router.route('/doneReturn')
-    .get(async (req, res )=>{
+//     res.redirect('/updateProfile');
+// }
+//     )
+    // router.route('/doneReturn')
+    // .get(async (req, res )=>{
             
-        res.redirect('/');
-    }
-        )
+    //     res.redirect('/');
+    // }
+    //     )
 
 
 
- router.route('/updateEmail')
-    .put(async (req, res )=>{
+ router.route('/updateProfile')
+    .post(async (req, res )=>{
  
-        memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
-            
-                if(!err)
-                mem.name = request.body.name;
-               else res.send("error user not found"+err);
-                }
+        let memberoz= memberSchema.findOne( 
+           
+            {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
+
+                memberoz.bio=req.body.bio;
+                await memberoz.save();
+                res.send('done')
             }
         
     
         )
 
-        router.route('/updateEmail')
-        .put(async (req, res )=>{
-     
-            memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
-                
-                    if(!err)
-                    mem.name = request.body.name;
-                   else res.send("error user not found"+err);
-                    }
-                    );
-                }
-            
-        
-            )
+   
  
 router.route('/updatePassword')
   
 
 .put(async (req, res )=>{
     const salt= await  bcrypt.genSalt(10)
-    let temp= await  bcrypt.hash(req.body.password, salt) 
+  //  const correctpassword= await bcrypt.compare(req.body.password, user.password)
+
         if(! req.body.password){
             res.send('You must sign up with password')
         }
-          memberSchema.findOne( {memberId: request.body.memberId}, function(err, mem) {
+        let temp= await  bcrypt.hash(req.body.password, salt) 
+
+         let memberoz= memberSchema.findOne( 
+            //  {memberId: request.body.memberId}, function(err, mem) {
            
-                if(!err)
-                mem.password = temp;
-               else res.send("error user not found"+err);
-                }
+            //     if(!err)
+            //     mem.password = temp;
+            //    else res.send("error user not found"+err);
+            //     }
+            {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
+
+                if(await bcrypt.compare(req.body.oldPassword, memberoz.password)){
+                    memberoz.password=temp;
+                     await memberoz.save();
+                     res.send('done password chaneged')
+                }
+
+                else{res.send('enter correct password ')}
             }
         
     
@@ -135,31 +136,35 @@ router.route('/signIn')
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
-        let day = dateObj.getUTCDate();
+        let day = dateObj.getUTCDate()+1;
         let year = dateObj.getUTCFullYear();
         let dateoz = new Date(year,month,day);
 
-        const sess =attendanceSchema.findOne(function(elem){
-            return elem.date==datoz && elem.memberId==req.body.memberId;
-        });
+        const sess =await attendanceSchema.findOne(
+        //     function(elem){
+        //     return elem.date==dateoz && elem.memberId==req.body.memberId;
+        // }
+        {$and:[{date:dateoz},{memberId:req.user.memberId}]}
+        );
         if(!sess){
             console.log('day added')
 
             let temp2=new attendanceSchema({
-                memberId:req.body.memberId,
+                memberId:req.user.memberId,
                 date:dateoz,
                 sessions:[temp],
-                missingMinutes:120,
-                missedDay:true
+                missedDay:false
 
             });
 
-            attendanceSchema.push(temp2);
+            await temp2.save();
             res.send(temp2);
         }
-        else{
+       else{
             console.log('session added')
             sess.sessions.push(temp);
+            await sess.save();
+            res.send(sess);
 
         }
 
@@ -187,30 +192,34 @@ router.route('/signOut')
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
-        let day = dateObj.getUTCDate();
+        let day = dateObj.getUTCDate()+1;
         let year = dateObj.getUTCFullYear();
         let dateoz = new Date(year,month,day);
 
-        const sess =attendanceSchema.findOne(function(elem){
-            return elem.date==datoz && elem.memberId==req.body.memberId;
-        });
+        const sess =await attendanceSchema.findOne(
+            //     function(elem){
+            //     return elem.date==dateoz && elem.memberId==req.body.memberId;
+            // }
+            {$and:[{date:dateoz},{memberId:req.user.memberId}]}
+            );
         if(!sess){
             console.log('day added')
 
             let temp2=new attendanceSchema({
-                memberId:req.body.memberId,
+                memberId:req.user.memberId,
                 date:dateoz,
                 sessions:[temp],
-                missingMinutes:504,
-                missedDay:true
+                missedDay:false
 
             });
 
             attendanceSchema.push(temp2);
+            await temp2.save();
             res.send(temp2);
+
         }
         else{
-            console.log('session added')
+            console.log('session added' +sess)
            
             
             let len = sess.sessions.length-1; 
@@ -220,11 +229,13 @@ router.route('/signOut')
                      console.log('time out added ')
                      sess.sessions[len].timeout=dateObj;
                      sess.missingMinutes=sess.missingMinutes-diffMinutes;
+                     await sess.save();
                      res.send("time out added")
                  } 
 
                  else{
                     sess.sessions.push(temp);
+                    await sess.save();
                     res.send('time out slot added ') 
                  }
 

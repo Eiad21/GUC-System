@@ -18,11 +18,9 @@ const courseSlotSchema=mongoose.Schema({
    location:{type:String,
            required:true
             },
-    assignedMemberID:{type:String,
-            required:true},
+    assignedMemberID:{type:String},
 
-    assignedMemberName:{type:String,
-            required:true}                
+    assignedMemberName:{type:String}                
   }
 
   );

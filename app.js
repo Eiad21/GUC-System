@@ -1,18 +1,26 @@
 const express = require('express');
 app = express();
-var Authroutes = require("./routes/AuthRoutes")
 var HODroutes = require("./routes/HodRoutes")
 var HRroutes = require("./routes/HRRoutes")
 var AnyAcademic=require("./routes/AnyAcademic")
 var instructorRoutes=require("./routes/InstructorRoutes")
+var cooRoutes=require("./routes/CoordinatorRoutes")
 const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const memberRoutes=require('./routes/memberRoutes')
+const Authroutes=require('./routes/AuthRoutes')
 
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
+app.use("/Hod",HODroutes);
+app.use("/hr",HRroutes);
+app.use("/anyAcademic",AnyAcademic);
+app.use("/memberRoutes",memberRoutes);
+app.use("/instructorRoutes",instructorRoutes);
+app.use("/cooRoutes",cooRoutes);
+
 
 app.use('',Authroutes);
 
@@ -20,17 +28,11 @@ app.use(async (req,res, next) =>{
     const token = req.headers.token;
 
     if(!token){
-        res.status(401).send("ya kalb");
+        return res.status(401).send("ya kalb");
     }
     req.user = jwt.verify(token, process.env.TOKEN_SECRET);
     next();
 })
-
-app.use("/Hod",HODroutes);
-app.use("/hr",HRroutes);
-app.use("/anyAcademic",AnyAcademic);
-app.use("/memberRoutes",memberRoutes);
-app.use("/instructorRoutes",instructorRoutes);
 
 //database tables constructors:
 // const Member=require('./models/memberSchema').constructor;
