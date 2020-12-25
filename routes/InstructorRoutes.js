@@ -1,33 +1,33 @@
 const express = require("express")
 const router = express.Router();
 
-const FacultyModel = require("../models/facultySchema").constructor;
-const MemberModel = require("../models/memberSchema").constructor;
+// const FacultyModel = require("../models/facultySchema").constructor;
+// const MemberModel = require("../models/memberSchema").constructor;
 
-// Instructor Routes
-const getDepartmentsInFac =async function(facultyName){
-    const fac =await FacultyModel.findOne({facultyName: facultyName})
-    return fac.departments;
-};
-const getCoursesInDep = async function(facultyName,departmentName){
-    const deps = await getDepartmentsInFac(facultyName);
-    const department = deps.find(dep => dep.departmentName == departmentName);
-    return department.courses;
-};
-const isInstructorOfCourse = function(course,instructorID){
-    const instructor = course.instructors.find(inst => inst.id === instructorID);
-    if(instructor)
-    {
-        // exist
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-};
-const isTAOfCourse = function(course,TAID){
-    const TA = course.TAs.find(t => t.id == TAID);
+// // Instructor Routes
+// const getDepartmentsInFac =async function(facultyName){
+//     const fac =await FacultyModel.findOne({facultyName: facultyName})
+//     return fac.departments;
+// };
+// const getCoursesInDep = async function(facultyName,departmentName){
+//     const deps = await getDepartmentsInFac(facultyName);
+//     const department = deps.find(dep => dep.departmentName == departmentName);
+//     return department.courses;
+// };
+// const isInstructorOfCourse = function(course,instructorID){
+//     const instructor = course.instructors.find(inst => inst.id === instructorID);
+//     if(instructor)
+//     {
+//         // exist
+//         return true;
+//     }
+//     else
+//     {
+//         return false;
+//     }
+// };
+// const isTAOfCourse = function(course,TAID){
+//     const TA = course.TAs.find(t => t.id == TAID);
     
     if(TA)
     {
@@ -166,54 +166,54 @@ router.post('/slotAcadMember', async (req,res)=>{
     // checking that the TA is of same department && from course staff
     const TA =await MemberModel.findOne({memberId: req.body.user});
    
-    if(TA.departmentName != departmentName)
-    {
-        return res.status(406).send("Not accepted to assign an academic member from another department!");
-    }
-    if(!isTAOfCourse(course,TA.memberId))
-    {
-        return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
-    }
-    course.courseSchedule.forEach(async (slot,idx)=>{
-        if(slot._id == req.body.slotID)
-        {
-            if(slot.user)
-            {
-               return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
-            }
-            // update the schedule of this member ---> adding this slot to it
-            const member = TA;
-            const tailoredSlot = {
-                day:slot.day,
-                time:slot.time,
-                location:slot.location,
-                courseName:course.courseName
-            };
-            // check if there are collisions in the member's schedule
-            const collisionSlot = member.schedule.find(slot => slot.day == tailoredSlot.day && slot.time == tailoredSlot.time)
+//     if(TA.departmentName != departmentName)
+//     {
+//         return res.status(406).send("Not accepted to assign an academic member from another department!");
+//     }
+//     if(!isTAOfCourse(course,TA.memberId))
+//     {
+//         return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
+//     }
+//     course.courseSchedule.forEach(async (slot,idx)=>{
+//         if(slot._id == req.body.slotID)
+//         {
+//             if(slot.user)
+//             {
+//                return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
+//             }
+//             // update the schedule of this member ---> adding this slot to it
+//             const member = TA;
+//             const tailoredSlot = {
+//                 day:slot.day,
+//                 time:slot.time,
+//                 location:slot.location,
+//                 courseName:course.courseName
+//             };
+//             // check if there are collisions in the member's schedule
+//             const collisionSlot = member.schedule.find(slot => slot.day == tailoredSlot.day && slot.time == tailoredSlot.time)
             
-            if(collisionSlot)
-            {
-                return res.status(406).send("This academic member has another course slot at this timing!");
-            }
+//             if(collisionSlot)
+//             {
+//                 return res.status(406).send("This academic member has another course slot at this timing!");
+//             }
 
             
-            course.courseSchedule[idx]={
-                slotID: slot.slotID,
-                day: slot.day,
-                time: slot.time,
-                location: slot.location,
-                assignedMemberID: req.body.assignedMemberID,
-                assignedMemberName: TA.name
-            };
-            course.assignedCount = course.assignedCount+1;
+//             course.courseSchedule[idx]={
+//                 slotID: slot.slotID,
+//                 day: slot.day,
+//                 time: slot.time,
+//                 location: slot.location,
+//                 assignedMemberID: req.body.assignedMemberID,
+//                 assignedMemberName: TA.name
+//             };
+//             course.assignedCount = course.assignedCount+1;
 
-            member.schedule.push(tailoredSlot);
-            await member.save();
+//             member.schedule.push(tailoredSlot);
+//             await member.save();
 
-            res.json(member);
-        }
-    });
+//             res.json(member);
+//         }
+//     });
     
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)

@@ -6,11 +6,7 @@ const MemberModel = require("../models/memberSchema").constructor;
 const RequestModel = require("../models/requestSchema").constructor;
 const CourseSlotModel = require("../models/courseSlotSchema").constructor;
 
-// Instructor Routes
-const getDepartmentsInFac = async function(facultyName){
-    const fac =await FacultyModel.findOne({facultyName: facultyName});
-    return fac.departments;
-};
+
 
 
 const getCoursesCoordinated = function(depCourses, coordiantorID){
@@ -93,7 +89,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
                 day: slot.day,
                 time: slot.time,
                 location: slot.location,
-                assignedMemberID: TA.memberID,
+                assignedMemberID: TA.memberId,
                 assignedMemberName: TA.name
             };
             course.assignedCount = course.assignedCount+1;
@@ -141,7 +137,7 @@ router.post('/rejecttSlotLinking', async (req,res)=>{
     const departmentName = req.signedMember.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.signedMember.memberID);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     const slotLinkingReq = await RequestModel.findOne({reqID: req.body.reqID});
     if(!slotLinkingReq)
@@ -172,7 +168,7 @@ router.post('/courseSlot', async (req,res)=>{
     const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, /*req.signedMember.memberID*/"ac_77");
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
     
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
     
@@ -219,7 +215,7 @@ router.delete('/courseSlot', async (req,res)=>{
     const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, /*req.signedMember.memberID*/"ac_77");
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
     if(!course)
