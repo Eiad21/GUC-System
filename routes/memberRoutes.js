@@ -76,14 +76,20 @@ router.route('/viewProfile')
  router.route('/updateProfile')
     .post(async (req, res )=>{
  
-        let memberoz= memberSchema.findOne( 
+        let memberoz= await memberSchema.findOne( 
            
             {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
 
+                if(!memberoz){
+                    res.status(400).send("Not found");
+                }
+                if(!req.body.bio){
+                    res.status(400).send("Bad request");
+                }
                 memberoz.bio=req.body.bio;
                 await memberoz.save();
-                res.send('done')
+                res.send(memberoz)
             }
         
     
@@ -92,18 +98,20 @@ router.route('/viewProfile')
    
  
 router.route('/updatePassword')
-  
 
 .put(async (req, res )=>{
     const salt= await  bcrypt.genSalt(10)
   //  const correctpassword= await bcrypt.compare(req.body.password, user.password)
 
-        if(! req.body.password){
-            res.send('You must sign up with password')
+        if(!req.body.passwordOld){
+            return res.status(400).send('You must enter your old password');
         }
-        let temp= await  bcrypt.hash(req.body.password, salt) 
+        if(!req.body.passwordNew){
+            return res.status(400).send('You must enter your new password');
+        }
+        let passwordNewHash= await  bcrypt.hash(req.body.passwordNew, salt) 
 
-         let memberoz= memberSchema.findOne( 
+         let memberoz= await memberSchema.findOne( 
             //  {memberId: request.body.memberId}, function(err, mem) {
            
             //     if(!err)
@@ -113,13 +121,13 @@ router.route('/updatePassword')
             {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
 
-                if(await bcrypt.compare(req.body.oldPassword, memberoz.password)){
-                    memberoz.password=temp;
+                if(await bcrypt.compare(req.body.passwordOld, memberoz.password)){
+                    memberoz.password=passwordNewHash;
                      await memberoz.save();
-                     res.send('done password chaneged')
+                     return res.send('Password chaneged')
                 }
 
-                else{res.send('enter correct password ')}
+                else{return res.status(400).send('enter correct password ')}
             }
         
     
@@ -178,12 +186,6 @@ router.route('/signOut')
   
 
     .post(async (req, res )=>{
-        
-           
-        
-
-
-
 
 
         let dateObj = new Date();
@@ -238,17 +240,7 @@ router.route('/signOut')
                     await sess.save();
                     res.send('time out slot added ') 
                  }
-
         }
-
-
-
-
-
-
-
-
-
         
     }
                         
@@ -260,7 +252,7 @@ router.route('/signOut')
 
 
 
-router.route('/viewAttendancee')
+router.route('/viewAttendance')
   
     .get(async (req, res )=>{
         let dateObj = new Date();
@@ -323,6 +315,8 @@ router.post('/viewMyAttendance', async (req,res)=>{
   }
 );
 })
+
+
 //////////////////////////viewMembersMissingHoursAndExtraHours
 router.post('/viewMembersMissingHoursAndExtraHours', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');

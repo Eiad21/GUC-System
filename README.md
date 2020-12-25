@@ -8,74 +8,72 @@ index .js port 8080
 
 ### GUC Staff Members Functionalities
 
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
 
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
+ * Functionality:Log in with a unique email and a password.
+ * Route:AuthRoutes/logIn
+ * Request type:post
+ * Parameters:body{email,password}
+ * Example of how to call the route:AuthRoutes/logIn
+ * Example for response:password changed 
+ 
+ * Functionality:Log out from the system.
+ * Route:/logOut
+ * Request type:get
+ * Parameters:nothing
+ * Example of how to call the route:memberRoutes/logOut
+ * Example for response:done
+ 
+ * Functionality:View their profile. Update their profile except for the id and the name. Academic members can’t update their salary, faculty and department. 
+ * Route:/viewProfile
+ * Request type:get
+ * Parameters:nothing
+ * Example of how to call the route:/memberRoutes/viewProfile
+ * Example for response:user 
+ 
+ * Functionality:Reset their passwords.
+ * Route:/updatePassword
+ * Request type:put
+ * Parameters:body{old password, new password}
+ * Example of how to call the route:/memberRoutes/updatePassword
+ * Example for response:password changed 
+ 
+ * Functionalities:Sign in. This should simulate a staff signing in(entering the campus).
+ * Route:/signIn
+ * Request type:post
+ * Parameters:nothing
+ * Example of how to call the route:memberRoutes/signIn
+ * Example for response:json sign in session
+ 
+ * Functionality:Sign out. This should simulate a staff signing out(leaving the campus).
+ * Route:/signOut
+ * Request type:post
+ * Parameters:nothing
+ * Example of how to call the route:memberRoutes/signOut
+ * Example for response:done
+ 
+ * Functionality:View all their attendance records, or they can specify exactly which month to view. 
+ * Route:/viewAttendancee
+ * Request type:get
+ * Parameters:date
+ * Example of how to call the route:memberRoutes/viewAttendancee
+ * Example for response:json schedule 
+ 
+ * Functionality:View if they have missing days. Missing days are days where the staff member don’t 
+    have any attendance record, is not a Friday nor his/her day off, and there is no accepted leave for this day.  
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:memberRoutes/
+ * Example for response:
+ 
+ * Functionality: View if they are having missing hours or extra hours 
+ * Route:/viewMembersMissingHoursAndExtraHours
+ * Request type:post
+ * Parameters:date
+ * Example of how to call the route:memberRoutes/viewMembersMissingHoursAndExtraHours
+ * Example for response:no missing hours 
 
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
 
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
-
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
-
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
-
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
-
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
-
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
-
-- Functionality:
-- Route:
-- Request type:
-- Parameters:
-- Example of how to call the route:
-- Example for response:
 
 ### instructor functionalities
 
