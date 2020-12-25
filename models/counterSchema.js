@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const counterSchema=mongoose.Schema({
-    // The counter names are: "acID", "hrID"
+    // The counter names are: "ac-", "hr-"
     //If you use other counter names please specify them above to avoid confusion`
     counterName:
       {
