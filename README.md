@@ -157,22 +157,115 @@ index .js port 8080
 * Example for using request parameters:  
 - Functionality: delete an academic member to an assigned slots in course(s) he/she is assigned to.  
 - Route: /instructorRoutes/slotAcadMember  
-- Request type: POST  
-- Request body: : { “academicMemberID” : “ac_1”, “courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
+- Request type: DELETE  
+- Request body: : {“courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
 - Example of how to call the route: /instructorRoutes/slotAcadMember  
 * Example for response:  
-- Functionality: it assigns this academic member to this course slot and accordingly changes both the schedule of the academic member, the course coverage, course assignment  
+- Functionality: it removes the assignment of this academic member to this course slot and accordingly changes both the schedule of the academic member, the course coverage, course assignment  
 - Route: /instructorRoutes/slotAcadMember \\
-- Request type: POST <br />
+- Request type: DELETE <br />
 - Response: the academic member document to check for correct updating for its schedule
 
 ### the method logic  
-  1) checking for the availibity of the assignment and doing data validation for the input data  
-  2) make the academic member the assigned member to this slot
-  3) increase the number of assigned slots to this course
-  4) add this slot to the member schedule after checking if there is any collision (another slot at same timing and location) in the schedule
+  1) getting the targeted course   
+  2) remove the assignedMemberID and assignedMemberName of the course slot to ""
 
 
+
+
+* Example for using request parameters:  
+- Functionality: Remove an assigned academic member in course(s) he/she is assigned to.  
+- Route: /instructorRoutes/courseAcadMember  
+- Request type: DELETE  
+- Request body: : {“courseName”: “CSEN704”, “memberID”: id of the academic member}  
+- Example of how to call the route: /instructorRoutes/courseAcadMember  
+* Example for response:  
+- Functionality: ot removes the specified member from the course and updates the course slot assignment and the member schedule accordingly  
+- Route: /instructorRoutes/courseAcadMember \\
+- Request type: DELETE <br />
+- Response: the course info to check the deletion of the member from the staff
+
+
+
+* Example for using request parameters:  
+- Functionality: Assign an academic member in each of his/her course(s) to be a course coordinator.  
+- Route: /instructorRoutes/courseCoordinator  
+- Request type: POST  
+- Request body: : {“courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
+- Example of how to call the route: /instructorRoutes/courseCoordinator  
+* Example for response:  
+- Functionality: it makes this academic member coordinator for this course  
+- Route: /instructorRoutes/courseCoordinator \\
+- Request type: POST <br />
+- Response: the academic member to check its rank
+
+### the method logic  
+  1) getting the course and the member from the DB   
+  2) change the course coord to be the member and the member role to be coord
+
+
+## coordiantor functionalities
+
+* Example for using request parameters:  
+- Functionality: View “slot linking” request(s) from academic members linked to his/her course.  
+- Route: /instructorRoutes/viewSlotLinkingReqs  
+- Request type: GET  
+- Request params: : nothing  
+- Example of how to call the route: /instructorRoutes/viewSlotLinkingReqs  
+* Example for response:  
+- Functionality: it gets all the slot linking requests sent to this coordinator from the database  
+- Route: /instructorRoutes/viewSlotLinkingReqs \\
+- Request type: GET <br />
+- Response: all the requests
+
+
+* Example for using request body:  
+- Functionality: accept “slot linking” request(s) from academic members linked to his/her course.  
+- Route: /instructorRoutes/acceptSlotLinking  
+- Request type: POST  
+- Request body: {"reqID:"The id of this request"}  
+- Example of how to call the route: /instructorRoutes/acceptSlotLinking  
+* Example for response:  
+- Functionality: it accepts the slot linking request and accordingly updates the member schedule and the course staff, also updates the course coverage  
+- Route: /instructorRoutes/acceptSlotLinking \\
+- Request type: POST <br />
+
+
+
+* Example for using request body:  
+- Functionality: reject “slot linking” request(s) from academic members linked to his/her course.  
+- Route: /instructorRoutes/rejecttSlotLinking  
+- Request type: POST  
+- Request body: {"reqID":"The id of this request"}  
+- Example of how to call the route: /instructorRoutes/rejecttSlotLinking  
+* Example for response:  
+- Functionality: its simply rejects the slot linking request and updates its status in the DB
+- Route: /instructorRoutes/rejecttSlotLinking \\
+- Request type: POST <br />
+
+
+* Example for using request body:  
+- Functionality: add slot to his/her course.  
+- Route: /instructorRoutes/courseSlot  
+- Request type: POST  
+- Request body: {"courseName":"CSEN704", courseSlotInfo: follow the courseSlotSchema}  
+- Example of how to call the route: /instructorRoutes/courseSlot  
+* Example for response:  
+- Functionality: Adding the slot to the course \\
+- Request type: POST <br />
+- Response: all the requests
+
+
+* Example for using request body:  
+- Functionality: delete slot to his/her course.  
+- Route: /instructorRoutes/courseSlot  
+- Request type: DELETE  
+- Request body: {"courseName":"CSEN704", courseSlotInfo: follow the courseSlotSchema}  
+- Example of how to call the route: /instructorRoutes/courseSlot  
+* Example for response:  
+- Functionality: removing the specified slot in course
+- Route: /instructorRoutes/courseSlot \\
+- Request type: DELETE <br />
 
 ## hr functionalities
 
@@ -275,8 +368,6 @@ index .js port 8080
 - Route: /hr/updateMemberSalary
 - Request type: POST
 - Request body: {“memberId” : “ac-4", “salary” : 8000}
->>>>>>> fc95a6bf6df052bd4fc2aec56da15ddceda43808
-
 
 
 
@@ -335,6 +426,8 @@ only the pending requests or only the rejected requests.
 - Request type: POST
 - Request body: {"dateYear":"2020","dateMonth":"12","dateDay":"10","reason":"valid reason","content":"info","comment":"comment","type":"type of leave(annual or sick or compensation ...)"}
 - Response the requests body that the logged in sent or recieved
+=======
+>>>>>>> a91ad1b96360a89aafd818c22d51b56450409440
 
 
 
