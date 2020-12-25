@@ -28,7 +28,7 @@ app.use(async (req,res, next) =>{
     const token = req.headers.token;
 
     if(!token){
-        res.status(401).send("ya kalb");
+        return res.status(401).send("ya kalb");
     }
     req.user = jwt.verify(token, process.env.TOKEN_SECRET);
     next();

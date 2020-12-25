@@ -1,5 +1,6 @@
 const express = require("express")
 var router = express.Router();
+const bcrypt = require("bcrypt")
 const Location = require("../models/locationSchema").constructor
 const Faculty = require("../models/facultySchema").constructor
 const Slot = require("../models/slotSchema").constructor
@@ -7,20 +8,15 @@ const Member = require("../models/memberSchema").constructor
 const Request = require("../models/requestSchema").requestModel
 const Course = require("../models/CourseSchema").constructor
 const Department = require("../models/departmentSchema").constructor
-
-
-app.use(express.json());
-app.use(express.urlencoded({extended:false}));
+require('dotenv').config()
 
 // Any Academic Routes
 
-app.get('/schedule',async(req,res)=>{
+router.get('/schedule',async(req,res)=>{
     try {
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(user.MemberRank!='hr'){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -32,7 +28,7 @@ app.get('/schedule',async(req,res)=>{
 })
 
 
-app.post('/replacementReq',async(req,res)=>{
+router.post('/replacementReq',async(req,res)=>{
     try{
         let {date,reason,content,reciever,comment,slotId,slotCourse}=req.body;
         const loggedinID="5fde5008edfe910c8c3dc6d2";
@@ -116,7 +112,7 @@ app.post('/replacementReq',async(req,res)=>{
 })
 
 
-app.get('/replacementReq',async(req,res)=>{
+router.get('/replacementReq',async(req,res)=>{
     try {
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
@@ -134,7 +130,7 @@ app.get('/replacementReq',async(req,res)=>{
     }
 })
 
-app.post('/acceptReplacementReq',async(req,res)=>{
+router.post('/acceptReplacementReq',async(req,res)=>{
     try {
         let {repId}=req.body;
         const loggedinID="5fde5008edfe910c8c3dc6d2";
@@ -171,7 +167,7 @@ app.post('/acceptReplacementReq',async(req,res)=>{
     }
 })
 
-app.post('/rejectReplacementReq',async(req,res)=>{
+router.post('/rejectReplacementReq',async(req,res)=>{
     try {
         let {repId}=req.body;
         const loggedinID="5fde5008edfe910c8c3dc6d2";
@@ -207,7 +203,7 @@ app.post('/rejectReplacementReq',async(req,res)=>{
     }
 })
 
-app.post('/slotLinkReq',async(req,res)=>{
+router.post('/slotLinkReq',async(req,res)=>{
     try{
         let {reason,content,comment,slotDay,slotTime,slotLoc,slotCourse}=req.body;
         const slot=new Slot({
@@ -259,7 +255,7 @@ app.post('/slotLinkReq',async(req,res)=>{
         res.status(500).json({error:error.message})
     }
 })
-app.post('/changeDayOffReq',async(req,res)=>{
+router.post('/changeDayOffReq',async(req,res)=>{
     try{
         let {reason,content,comment,newDayOff}=req.body;
 
@@ -312,7 +308,7 @@ app.post('/changeDayOffReq',async(req,res)=>{
     }
 })
 
-app.get('/requests',async(req,res)=>{
+router.get('/requests',async(req,res)=>{
     try {
         
         let {filter}=req.body;
@@ -354,7 +350,7 @@ app.get('/requests',async(req,res)=>{
     }
 })
 
-app.post('/cancelReq',async(req,res)=>{
+router.post('/cancelReq',async(req,res)=>{
     try{
         let {_id}=req.body;
 
@@ -395,7 +391,7 @@ app.post('/cancelReq',async(req,res)=>{
     }
 })
 
-app.post('/submitLeaves',async(req,res)=>{
+router.post('/submitLeaves',async(req,res)=>{
     try{
         let {date,reason,content,comment,type,theReplacementId}=req.body;
 
