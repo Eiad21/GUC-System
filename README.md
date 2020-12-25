@@ -204,7 +204,68 @@ index .js port 8080
   2) change the course coord to be the member and the member role to be coord
 
 
+## coordiantor functionalities
 
+* Example for using request parameters:  
+- Functionality: View “slot linking” request(s) from academic members linked to his/her course.  
+- Route: /instructorRoutes/viewSlotLinkingReqs  
+- Request type: GET  
+- Request params: : nothing  
+- Example of how to call the route: /instructorRoutes/viewSlotLinkingReqs  
+* Example for response:  
+- Functionality: it gets all the slot linking requests sent to this coordinator from the database  
+- Route: /instructorRoutes/viewSlotLinkingReqs \\
+- Request type: GET <br />
+- Response: all the requests
+
+
+* Example for using request body:  
+- Functionality: accept “slot linking” request(s) from academic members linked to his/her course.  
+- Route: /instructorRoutes/acceptSlotLinking  
+- Request type: POST  
+- Request body: {"reqID:"The id of this request"}  
+- Example of how to call the route: /instructorRoutes/acceptSlotLinking  
+* Example for response:  
+- Functionality: it accepts the slot linking request and accordingly updates the member schedule and the course staff, also updates the course coverage  
+- Route: /instructorRoutes/acceptSlotLinking \\
+- Request type: POST <br />
+
+
+
+* Example for using request body:  
+- Functionality: reject “slot linking” request(s) from academic members linked to his/her course.  
+- Route: /instructorRoutes/rejecttSlotLinking  
+- Request type: POST  
+- Request body: {"reqID":"The id of this request"}  
+- Example of how to call the route: /instructorRoutes/rejecttSlotLinking  
+* Example for response:  
+- Functionality: its simply rejects the slot linking request and updates its status in the DB
+- Route: /instructorRoutes/rejecttSlotLinking \\
+- Request type: POST <br />
+
+
+* Example for using request body:  
+- Functionality: add slot to his/her course.  
+- Route: /instructorRoutes/courseSlot  
+- Request type: POST  
+- Request body: {"courseName":"CSEN704", courseSlotInfo: follow the courseSlotSchema}  
+- Example of how to call the route: /instructorRoutes/courseSlot  
+* Example for response:  
+- Functionality: Adding the slot to the course \\
+- Request type: POST <br />
+- Response: all the requests
+
+
+* Example for using request body:  
+- Functionality: delete slot to his/her course.  
+- Route: /instructorRoutes/courseSlot  
+- Request type: DELETE  
+- Request body: {"courseName":"CSEN704", courseSlotInfo: follow the courseSlotSchema}  
+- Example of how to call the route: /instructorRoutes/courseSlot  
+* Example for response:  
+- Functionality: removing the specified slot in course
+- Route: /instructorRoutes/courseSlot \\
+- Request type: DELETE <br />
 
 ## hr functionalities
 
