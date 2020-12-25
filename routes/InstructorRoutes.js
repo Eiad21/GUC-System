@@ -134,11 +134,14 @@ router.get('/viewCourseStaff/:courseName', async (req,res)=>{
     const departmentName = req.signedMember.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
     const course = depCourses.find(course => course.courseName == req.params.courseName);
-    // if(!isInstructorOfCourse(course,req.signedMember.memberID))
-    // const staffInfo = {
-    //     instructors: course.instructors,
-    //     TAs: course.TAs
-    // };
+    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+     {
+
+     }
+     const staffInfo = {
+        instructors: course.instructors,
+        TAs: course.TAs
+        };
     res.send(staffInfo);
 })
 
@@ -170,7 +173,7 @@ router.post('/slotAcadMember', async (req,res)=>{
         return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
     course.courseSchedule.forEach(async (slot,idx)=>{
-        if(slot.slotID == req.body.slotID)
+        if(slot._id == req.body.slotID)
         {
             if(slot.assignedMemberID)
             {
