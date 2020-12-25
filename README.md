@@ -276,3 +276,65 @@ index .js port 8080
 - Request type: POST
 - Request body: {“memberId” : “ac-4", “salary” : 8000}
 >>>>>>> fc95a6bf6df052bd4fc2aec56da15ddceda43808
+
+
+
+
+
+### Academic member functionalities
+
+- Functionality: View their schedule.
+- Route: /hr/schedule
+- Request type: GET
+- Request body: {}
+- Response body: Schedule slots , {"day":"MON","time":"1","location":"C7.01","courseName":"CSEN 704"}
+
+- Functionality:Send replacement request(s).
+- Route: /hr/replacementReq
+- Request type: POST
+- Request body: {"dateYear":"2020","dateMonth":"12","dateDay":"2","reason":"busy","content":"info","reciever":"academicMemberID","comment":"valid comment","slotId":"_id of the course slot","slotCourse":"CSEN 704"}
+- Response the request body
+
+- Functionality:View replacement request(s).
+- Route: /hr/replacementReq
+- Request type: GET
+- Request body: {}
+- Response the requests body that the logged in sent or recieved
+
+
+- Functionality:Send a slot linking request (automatically sent to course coordinator).
+- Route: /hr/slotLinkReq
+- Request type: POST
+- Request body: {"reason":"busy","content":"info","comment":"comment","slotId":"_id of the course slot","slotCourse":"CSEN 704"}
+- Response the request body
+
+
+- Functionality:Change their day off by sending a change day off request (automatically sent to HOD),
+and optionally leave a reason.
+- Route: /hr/changeDayOffReq
+- Request type: POST
+- Request body: {"reason":"busy","content":"info","comment":"comment","newDayOff":"MON"}
+- Response the requests body that the logged in sent or recieved
+
+- Functionality:View the status of all submitted requests. They can also view only the accepted requests,
+only the pending requests or only the rejected requests.
+- Route: /hr/requests
+- Request type: GET
+- Request body: {"filter":"pending or accepted or rejected or empty"}
+- Response the requests body that the logged in sent or recieved
+
+
+- Functionality:Cancel a still pending request or a request whose day is yet to come.
+- Route: /hr/cancelReq
+- Request type: POST
+- Request body: {"_id":"_id of the request"}
+- Response the requests body that the logged in sent or recieved
+
+- Functionality:Submit any type of leave request (automatically sent to HOD).
+- Route: /hr/submitLeaves
+- Request type: POST
+- Request body: {"dateYear":"2020","dateMonth":"12","dateDay":"10","reason":"valid reason","content":"info","comment":"comment","type":"type of leave(annual or sick or compensation ...)"}
+- Response the requests body that the logged in sent or recieved
+
+
+
