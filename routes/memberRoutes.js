@@ -163,7 +163,7 @@ router.route('/signIn')
     .post(async (req, res )=>{
         let dateObj = new Date();
 
-        let temp =new signInSessionSchema({timeIn:dateObj 
+        let temp =new signInSessionSchema({timein:dateObj 
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
@@ -206,7 +206,70 @@ router.route('/signOut')
 
     .post(async (req, res )=>{
         
-                    
+           
+        
+
+
+
+
+
+        let dateObj = new Date();
+
+        let temp =new signInSessionSchema({timeout:dateObj 
+        });
+
+        let month = dateObj.getUTCMonth() ; //months from 1-12
+        let day = dateObj.getUTCDate();
+        let year = dateObj.getUTCFullYear();
+        let dateoz = new Date(year,month,day);
+
+        const sess =attendanceSchema.findOne(function(elem){
+            return elem.date==datoz && elem.memberId==req.body.memberId;
+        });
+        if(!sess){
+            console.log('day added')
+
+            let temp2=new attendanceSchema({
+                memberId:req.body.memberId,
+                date:dateoz,
+                sessions:[temp],
+                missingMinutes:120,
+                missedDay:true
+
+            });
+
+            attendanceSchema.push(temp2);
+            res.send(temp2);
+        }
+        else{
+            console.log('session added')
+            sess.sessions.push(temp);
+            
+            let len = sess.sessions.length-1; 
+                 if(! sess.sessions[len].timeout){
+                     const diffTime = Math.abs(dateObj - sess.sessions[len].timein);
+                     const diffMinutes = Math.ceil(diffTime / (1000 * 60  )); 
+                     console.log('time out added ')
+                     sess.sessions[len].timeout=dateObj;
+                     sess.missingMinutes=sess.missingMinutes-diffMinutes;
+                     res.send("time out added")
+                 } 
+
+                 else{
+                    sess.sessions.push(temp);
+                    res.send('time out slot added ') 
+                 }
+
+        }
+
+
+
+
+
+
+
+
+
         
     }
                         
