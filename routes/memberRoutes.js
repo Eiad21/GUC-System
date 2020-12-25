@@ -9,7 +9,7 @@ const bcrypt =require('bcryptjs');
 const jwt= require('jsonwebtoken')// router.route('/login').get(async(req, res)=>{
 const attendanceSchema = require("../models/attendanceSchema").constructor
 const signInSessionSchema = require("../models/signInSessionSchema").constructor
-
+require('dotenv').config()
 // const {email, password}=req.body
 
 
@@ -32,7 +32,6 @@ const signInSessionSchema = require("../models/signInSessionSchema").constructor
     }
 
     const correctpassword= await bcrypt.compare(req.body.password, user.password)
-
     if(!correctpassword){
         return res.status(400).send('Invalid Password')
     }
@@ -41,19 +40,19 @@ const signInSessionSchema = require("../models/signInSessionSchema").constructor
     //         _id: user._id,
     // role: user.role
 
-        name:user.body.name,
-        gender:user.body.gender,
-        memberId:user.body.memberId,
-        Facultyname:user.body.Facultyname,
-        departmentName:user.body.departmentName,
-        email:user.body.email,
+        name:user.name,
+        gender:user.gender,
+        memberId:user.memberId,
+        Facultyname:user.Facultyname,
+        departmentName:user.departmentName,
+        email:user.email,
         //password:hashedPass,
 
-        salary:user.body.salary,
-        officeLocation:user.body.officeLocation,
-        MemberRank:user.body.MemberRank,
-        dayoff:user.body.dayoff,
-        schedule:user.body.schedule
+        salary:user.salary,
+        officeLocation:user.officeLocation,
+        MemberRank:user.MemberRank,
+        dayoff:user.dayoff,
+        schedule:user.schedule
 
     
 }, process.env.TOKEN_SECRET)
@@ -63,7 +62,7 @@ const signInSessionSchema = require("../models/signInSessionSchema").constructor
 ///////////////////////////////////////////////////////
 router.route('/logOut')
 .get(async (req, res)=>{
-    
+    req.headers.id
   res.cookie('jwt','',{maxAge:1});
   res.redirect('/');
 }
