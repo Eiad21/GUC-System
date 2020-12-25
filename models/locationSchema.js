@@ -20,6 +20,7 @@ const locationSchema=mongoose.Schema(
     type:Number
   },
 
+  // ACCEPTABLE TYPES: Office, Tutorial, Lab, Lecture_Hall, Exam_Hall
   locationType:
   {
     type:String,

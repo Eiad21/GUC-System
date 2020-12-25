@@ -10,7 +10,7 @@ const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const memberRoutes=require('./routes/memberRoutes')
 const Authroutes=require('./routes/AuthRoutes')
-
+require('./automation/automatedfunction');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
