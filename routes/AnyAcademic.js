@@ -435,7 +435,7 @@ app.post('/submitLeaves',async(req,res)=>{
                 type:type,
                 comment:comment,
                 status:"pending",
-                theReplacementId:theReplacementId
+                Replacements:replacements
     
             })
             request.save().then((data)=>{
