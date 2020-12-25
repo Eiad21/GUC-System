@@ -243,7 +243,7 @@ router.route('/signOut')
         }
         else{
             console.log('session added')
-            sess.sessions.push(temp);
+           
             
             let len = sess.sessions.length-1; 
                  if(! sess.sessions[len].timeout){
