@@ -29,12 +29,16 @@ router.get('/schedule',async(req,res)=>{
 
 router.post('/replacementReq',async(req,res)=>{
     try{
-        let {date,reason,content,reciever,comment,slotId,slotCourse}=req.body;
+        let {dateYear,dateMonth,dateDay,reason,content,reciever,comment,slotId,slotCourse}=req.body;
         const user=req.user;
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
-
+        const date=new Date({
+            year:dateYear,
+            month:dateMonth,
+            day:dateDay
+        })
         if(!slotId){
             return res.status(400).json({msg:"Slot Id is required"});
         }
@@ -42,7 +46,7 @@ router.post('/replacementReq',async(req,res)=>{
             return res.status(400).json({msg:"Slot Course is required"});
         }
 
-        if(!date){
+        if(!dateYear || !dateMonth || !dateDay){
             return res.status(400).json({msg:"Date is required"});
         }
         if(!reciever){
@@ -61,6 +65,10 @@ router.post('/replacementReq',async(req,res)=>{
         
         const userReciever=await Member.findOne({memberId:reciever});
 
+        if(!userReciever){
+            return res.status(400).json({msg:"Reciever is not valid"});
+        }
+
         //query to get the course
         const course=await Course.findOne({courseName:slotCourse});
 
@@ -75,7 +83,7 @@ router.post('/replacementReq',async(req,res)=>{
         }
 
         var clash = false;
-        for(i in user.schedule){
+        for(i in userReciever.schedule){
             if(userReciever.schedule[i].day === theSlot.day && userReciever.schedule[i].time === theSlot.time){
                 clash=true;
             }
