@@ -479,10 +479,10 @@ router.post('/addMember', async (req,res)=>{
     const member = await new Member({
          name:req.body.name,
          gender:req.body.gender,
-         memberId:req.body.MemberRank,
+         memberId:prefix,
          email:req.body.email,
          password:hashedPass,
-         MemberRank:prefix
+         MemberRank:req.body.MemberRank
      });
 
     member.save().then((data)=>{
