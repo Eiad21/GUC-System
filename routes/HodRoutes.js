@@ -255,12 +255,24 @@ router.get("/viewallrequest",async(req,res)=>{
     //check if iam a Hod using id from token
      await DepartmentSchema.findOne({headID:"3"}).then((doc)=>{
          var allrequestinmydept=requestSchema.find({reciever:doc.depadepartmentName,type:"change_day_off"||"leave"})
-         if(allrequestinmydept!=[])
          res.status(200).send(allrequestinmydept)
-         else {res.status(404).send("there is no requests sent from any member in your department")}
+     }).catch((err)=>{res.status(400).send("Bad Request")})
 
-     }).catch((err)=>{res.status(404).send("Sorry you can not access this featuer because you are not a Head of any Department")})
+})
 
+
+
+
+router.get("/viewcoverageofcourses",async(req,res)=>{
+    //instead of id equal 3 change it to req.user.id
+   await DepartmentSchema.findOne({headID:"3"}).then((doc)=>{
+var allcoursescoverage= [];
+       doc.courses.forEach(element => {
+           allcoursescoverage.push({CourseName:element.courseName, Coverage:element.coverage})
+       })
+           res.status(200).send(allcoursescoverage)
+      
+   }).catch((err)=>{res.status(400).send("Bad Request")})
 })
 
 
