@@ -20,10 +20,17 @@ const signInSessionSchema = require("../models/signInSessionSchema").constructor
 //////////////////////////////////////////////////
  router.route('/logIn')
 .post(async (req, res)=>{
-    const user= await memberSchema.findOne({email : req.body.email})
-    if(user == null){
-        return res.send('You must sign up first')
+    if(!req.body.email){
+        return res.status(401).send('You must enter an email');
     }
+    if(!req.body.password){
+        return res.status(401).send('You must enter a password');
+    }
+    const user= await memberSchema.findOne({email : req.body.email})
+    if(!user){
+        return res.status(401).send('You must sign up first');
+    }
+
     const correctpassword= await bcrypt.compare(req.body.password, user.password)
 
     if(!correctpassword){

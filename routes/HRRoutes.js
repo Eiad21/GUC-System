@@ -1,11 +1,13 @@
 const express = require("express")
 var router = express.Router();
+const bcrypt = require("bcrypt")
 const Location = require("../models/locationSchema").constructor
 const Faculty = require("../models/facultySchema").constructor
 const Department = require("../models/departmentSchema").constructor
 const Course = require("../models/CourseSchema").constructor
 const Member = require("../models/memberSchema").constructor
 const Attendance = require("../models/attendanceSchema").constructor
+const Counter = require("../models/counterSchema").constructor
 const Session = require("../models/signInSessionSchema").constructor
 
 // HR Routes
@@ -118,7 +120,7 @@ router.post('/updateFaculty', async (req,res)=>{
         {
             // For values you don't wish to change enter the old value
             facultyName:req.body.facultyNameNew,
-            deanName:req.body.deanName
+            deanID:req.body.deanID
         },
         { new: true },)
         
@@ -163,6 +165,7 @@ router.post('/addDepartment', async (req,res)=>{
             const department= await new Department({
                 departmentName:req.body.departmentName,
                 headID:req.body.headID,
+                // get automatically
                 headName:req.body.headName,
             });
             // Add Faculty to the Department
@@ -289,6 +292,7 @@ router.post('/addCourse', async (req,res)=>{
                         courseName:req.body.courseName,
                         coverage:req.body.coverage,
                         coordinatorID:req.body.coordinatorID,
+                        // get auto
                         coordinatorName:req.body.coordinatorName
                     });
 
@@ -411,27 +415,102 @@ router.post('/deleteCourse', async (req,res)=>{
 
 // Member manipulation
 router.post('/addMember', async (req,res)=>{
+    if(!req.body.MemberRank){
+        return res.status(401).send("Member rank must be specified");
+    }
+    if(!req.body.email){
+        return res.status(401).send("Member email must be specified");
+    }
+    if(!req.body.name){
+        return res.status(401).send("Member name must be specified");
+    }
+    if(!req.body.gender){
+        return res.status(401).send("Member gender must be specified");
+    }
+    const user = await Member.findOne({email:req.body.email});
+    if(user){
+        return res.status(401).send("Member already exists");
+    }
+
+    var prefix;
+    if(req.body.MemberRank === "hr"){
+        prefix = "hr-"
+    }
+    else{
+        prefix = "ac-"
+    }
+    const num = await Counter.findOne({counterName:prefix});
+    if(!num){
+        const count = await new Counter({
+            counterName:prefix,
+            counterCount:1
+        });
+        prefix+="1";
+        await count.save();
+    }
+    else{
+        num.counterCount = num.counterCount+1;
+        prefix = prefix+num.counterCount;
+        await num.save();
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPass = await bcrypt.hash("123456", salt);
+    console.log(prefix);
     const member = await new Member({
-        name:req.body.name,
-        gender:req.body.gender,
-        memberId:req.body.memberId,
-        email:req.body.email,
-        password:"123456"
-    });
+         name:req.body.name,
+         gender:req.body.gender,
+         memberId:prefix,
+         email:req.body.email,
+         password:hashedPass,
+         MemberRank:prefix
+     });
 
     member.save().then((data)=>{
-        res.send(data);
-        console.log(data);
-    }).catch((error)=>{
-        res.json(error);
-        console.log(error);
-    });
+         res.send(data);
+         console.log(data);
+     }).catch((error)=>{
+         res.json(error);
+         console.log(error);
+     });
 })
 
 router.post('/updateMemberDepartment', async (req,res)=>{
-    if(!req.body.memberId){
+    if(!req.body.memberId || !req.body.facultyName || req.body.departmentName){
         // bad request
     }
+
+        // Add to new Fac and Dep
+        await Faculty.findOne({
+        facultyName:req.body.facultyName
+        })
+        .then((doc) =>{
+            if(!doc){
+                // not found
+            }
+
+            const values = {id: mem.memberId, name: mem.name, mail: mem.email, office: mem.officeLocation}
+        
+            const depNew = doc.departments.find(item => {
+                return item.departmentName === req.body.departmentName;
+            })
+
+            if(!depNew){
+                // not found
+            }
+
+            depNew.staff.push(values);
+        
+            doc.save();
+            
+            res.statusCode = 200;
+            res.send();
+
+        })
+        .catch((error)=>{
+            console.log(error)
+            res.send(error);
+        })
+    
     // Find the member
     Member.findOne(
         {memberId: req.body.memberId})
@@ -475,32 +554,6 @@ router.post('/updateMemberDepartment', async (req,res)=>{
                             doc.save();
                          }
                     }
-                    
-                     // Add to new Fac and Dep
-                     Faculty.findOne({
-                        facultyName:mem.FacultyName
-                    })
-                    .then((doc) =>{
-
-                        const values = {id: mem.memberId, name: mem.name, mail: mem.email, office: mem.officeLocation}
-                    
-                        const depNew = doc.departments.find(item => {
-                            return item.departmentName === req.body.departmentName;
-                        })
-
-                     depNew.staff.push(values);
-                    
-                     doc.save();
-                     
-                     res.statusCode = 200;
-                     res.send();
-
-                    })
-                    .catch((error)=>{
-                        console.log(error)
-                        res.send(error);
-                    })
-                     
     
                 })
                 //console.log(doc);
