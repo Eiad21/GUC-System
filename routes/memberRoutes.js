@@ -9,7 +9,7 @@ const bcrypt =require('bcryptjs');
 const jwt= require('jsonwebtoken')// router.route('/login').get(async(req, res)=>{
 const attendanceSchema = require("../models/attendanceSchema").constructor
 const signInSessionSchema = require("../models/signInSessionSchema").constructor
-
+require('dotenv').config()
 // const {email, password}=req.body
 
 
@@ -17,54 +17,15 @@ const signInSessionSchema = require("../models/signInSessionSchema").constructor
 //  )
 
 
-//////////////////////////////////////////////////
- router.route('/logIn')
-.post(async (req, res)=>{
-    if(!req.body.email){
-        return res.status(401).send('You must enter an email');
-    }
-    if(!req.body.password){
-        return res.status(401).send('You must enter a password');
-    }
-    const user= await memberSchema.findOne({email : req.body.email})
-    if(!user){
-        return res.status(401).send('You must sign up first');
-    }
 
-    const correctpassword= await bcrypt.compare(req.body.password, user.password)
-
-    if(!correctpassword){
-        return res.status(400).send('Invalid Password')
-    }
-    const token= jwt.sign(
-        {
-    //         _id: user._id,
-    // role: user.role
-
-        name:user.body.name,
-        gender:user.body.gender,
-        memberId:user.body.memberId,
-        Facultyname:user.body.Facultyname,
-        departmentName:user.body.departmentName,
-        email:user.body.email,
-        //password:hashedPass,
-
-        salary:user.body.salary,
-        officeLocation:user.body.officeLocation,
-        MemberRank:user.body.MemberRank,
-        dayoff:user.body.dayoff,
-        schedule:user.body.schedule
-
-    
-}, process.env.TOKEN_SECRET)
-    res.header('auth-token', token).send(token)
-})
-
-///////////////////////////////////////////////////////
 router.route('/logOut')
 .get(async (req, res)=>{
-    
+    console.log("hi123")
+    console.log(req.headers.token);
+    console.log(req.user);
+    req.headers.id
   res.cookie('jwt','',{maxAge:1});
+  console.log(req.headers.token);
   res.redirect('/');
 }
     )
