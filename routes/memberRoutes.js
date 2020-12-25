@@ -135,31 +135,35 @@ router.route('/signIn')
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
-        let day = dateObj.getUTCDate();
+        let day = dateObj.getUTCDate()+1;
         let year = dateObj.getUTCFullYear();
         let dateoz = new Date(year,month,day);
 
-        const sess =attendanceSchema.findOne(function(elem){
-            return elem.date==datoz && elem.memberId==req.body.memberId;
-        });
+        const sess =await attendanceSchema.findOne(
+        //     function(elem){
+        //     return elem.date==dateoz && elem.memberId==req.body.memberId;
+        // }
+        {$and:[{date:dateoz},{memberId:req.user.memberId}]}
+        );
         if(!sess){
             console.log('day added')
 
             let temp2=new attendanceSchema({
-                memberId:req.body.memberId,
+                memberId:req.user.memberId,
                 date:dateoz,
                 sessions:[temp],
-                missingMinutes:120,
-                missedDay:true
+                missedDay:false
 
             });
 
-            attendanceSchema.push(temp2);
+            await temp2.save();
             res.send(temp2);
         }
-        else{
+       else{
             console.log('session added')
             sess.sessions.push(temp);
+            await sess.save();
+            res.send(sess);
 
         }
 
