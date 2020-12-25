@@ -35,7 +35,7 @@ router.route('/logIn')
         name:user.name,
         gender:user.gender,
         memberId:user.memberId,
-        Facultyname:user.Facultyname,
+        Facultyname:user.FacultyName,
         departmentName:user.departmentName,
         email:user.email,
         //password:hashedPass,
