@@ -18,6 +18,12 @@ app.get('/schedule',async(req,res)=>{
     try {
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
+        
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         res.json(user.schedule);
         
     } catch (error) {
@@ -28,10 +34,22 @@ app.get('/schedule',async(req,res)=>{
 
 app.post('/replacementReq',async(req,res)=>{
     try{
-        let {date,reason,content,reciever,comment}=req.body;
+        let {date,reason,content,reciever,comment,slotId,slotCourse}=req.body;
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
-        
+
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
+        if(!slotId){
+            return res.status(400).json({msg:"Slot Id is required"});
+        }
+        if(!slotCourse){
+            return res.status(400).json({msg:"Slot Course is required"});
+        }
+
         if(!date){
             return res.status(400).json({msg:"Date is required"});
         }
@@ -48,6 +66,31 @@ app.post('/replacementReq',async(req,res)=>{
         if(!content){
             content="";
         }
+        
+        const userReciever=await Member.findOne({memberId:reciever});
+
+        //query to get the course
+        const course=await Course.findOne({courseName:slotCourse});
+
+        if(!course){
+            return res.status(400).json({msg:"Slot Course is not valid"});
+        }
+
+        const theSlot=course.courseSchedule.find({slotID:slotId});
+        
+        if(!theSlot){
+            return res.status(400).json({msg:"Slot is not valid"});
+        }
+        var clash = false;
+        for(i in user.schedule){
+            if(user.schedule[i].day === theSlot.day && user.schedule[i].time === theSlot.time){
+                clash=true;
+            }
+        }
+
+        if(clash){
+            return res.status(400).json({msg:"The Reciever already has a slot at the time"});
+        }
 
         const request=new Request({
             date:date,
@@ -57,8 +100,9 @@ app.post('/replacementReq',async(req,res)=>{
             reciever:reciever,
             type:"replacement",
             status:"pending",
-            comment:comment
-
+            comment:comment,
+            slotId:slotId,
+            slotCourse:slotCourse
         })
         request.save().then((data)=>{
             res.json(data);
@@ -76,8 +120,87 @@ app.get('/replacementReq',async(req,res)=>{
     try {
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
+
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         const all = await Request.find({type:"replacement"},{$or:[{sender: user.memberId},{reciever: user.memberId}]})
         res.json(all);
+        
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+})
+
+app.post('/acceptReplacementReq',async(req,res)=>{
+    try {
+        let {repId}=req.body;
+        const loggedinID="5fde5008edfe910c8c3dc6d2";
+        const user=await Member.findOne({_id:loggedinID});
+        
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+        
+        if(!repId){
+            return res.status(400).json({msg:"invalid request"});
+        }
+
+        //update the record
+        Request.findOneAndUpdate(
+            {_id: repId},
+            {
+                status:accepted
+            },
+            { new: true },)
+            
+            .then((doc) => {
+                res.send(doc)
+              })
+              .catch((err) => {
+                  res.send(err)
+            }
+        );
+
+        
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+})
+
+app.post('/rejectReplacementReq',async(req,res)=>{
+    try {
+        let {repId}=req.body;
+        const loggedinID="5fde5008edfe910c8c3dc6d2";
+        const user=await Member.findOne({_id:loggedinID});
+        
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
+        if(!repId){
+            return res.status(400).json({msg:"invalid request"});
+        }
+
+        //update the record
+        Request.findOneAndUpdate(
+            {_id: repId},
+            {
+                status:accepted
+            },
+            { new: true },)
+            
+            .then((doc) => {
+                res.send(doc)
+              })
+              .catch((err) => {
+                  res.send(err)
+            }
+        );
         
     } catch (error) {
         res.status(500).json({error:error.message})
@@ -96,6 +219,11 @@ app.post('/slotLinkReq',async(req,res)=>{
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
         
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         //query to get the course coordinator
         const course=await Course.findOne({courseName:slotCourse});
         const reciever=course.coordiantorID
@@ -142,6 +270,11 @@ app.post('/changeDayOffReq',async(req,res)=>{
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
         
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         if(!newDayOff){
             return res.status(400).json({msg:"New Day Off is required"});
         }
@@ -188,6 +321,11 @@ app.get('/requests',async(req,res)=>{
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
 
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         if(!filter){
             const all = await Request.find({$or:[{sender: user.memberId},{reciever: user.memberId}]})
             res.json(all);
@@ -223,6 +361,11 @@ app.post('/cancelReq',async(req,res)=>{
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
         
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         const request=await Request.findOne({_id:_id});
         
         if(request.status=='pending'){
@@ -259,6 +402,10 @@ app.post('/submitLeaves',async(req,res)=>{
         const loggedinID="5fde5008edfe910c8c3dc6d2";
         const user=await Member.findOne({_id:loggedinID});
         
+        const verified=true;
+        if(!verified || user.MemberRank=='hr'){
+            return res.status(400).json({msg:"Access denied"});
+        }
 
         //query to get the HOD
         const dep=await Department.findOne({departmentName:user.department});
@@ -276,6 +423,9 @@ app.post('/submitLeaves',async(req,res)=>{
             if(new Date(date)<=new Date()) {
                 return res.status(400).json({msg:"Annual leaves should be submitted before the targeted day"});
             }
+
+            const replacements=await Request.find({date:date,sender:user.memberId,status:accepted});
+
             const request=new Request({
                 date:date,
                 reason:reason,
