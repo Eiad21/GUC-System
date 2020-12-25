@@ -157,115 +157,22 @@ index .js port 8080
 * Example for using request parameters:  
 - Functionality: delete an academic member to an assigned slots in course(s) he/she is assigned to.  
 - Route: /instructorRoutes/slotAcadMember  
-- Request type: DELETE  
-- Request body: : {“courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
+- Request type: POST  
+- Request body: : { “academicMemberID” : “ac_1”, “courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
 - Example of how to call the route: /instructorRoutes/slotAcadMember  
 * Example for response:  
-- Functionality: it removes the assignment of this academic member to this course slot and accordingly changes both the schedule of the academic member, the course coverage, course assignment  
+- Functionality: it assigns this academic member to this course slot and accordingly changes both the schedule of the academic member, the course coverage, course assignment  
 - Route: /instructorRoutes/slotAcadMember \\
-- Request type: DELETE <br />
+- Request type: POST <br />
 - Response: the academic member document to check for correct updating for its schedule
 
 ### the method logic  
-  1) getting the targeted course   
-  2) remove the assignedMemberID and assignedMemberName of the course slot to ""
+  1) checking for the availibity of the assignment and doing data validation for the input data  
+  2) make the academic member the assigned member to this slot
+  3) increase the number of assigned slots to this course
+  4) add this slot to the member schedule after checking if there is any collision (another slot at same timing and location) in the schedule
 
 
-
-
-* Example for using request parameters:  
-- Functionality: Remove an assigned academic member in course(s) he/she is assigned to.  
-- Route: /instructorRoutes/courseAcadMember  
-- Request type: DELETE  
-- Request body: : {“courseName”: “CSEN704”, “memberID”: id of the academic member}  
-- Example of how to call the route: /instructorRoutes/courseAcadMember  
-* Example for response:  
-- Functionality: ot removes the specified member from the course and updates the course slot assignment and the member schedule accordingly  
-- Route: /instructorRoutes/courseAcadMember \\
-- Request type: DELETE <br />
-- Response: the course info to check the deletion of the member from the staff
-
-
-
-* Example for using request parameters:  
-- Functionality: Assign an academic member in each of his/her course(s) to be a course coordinator.  
-- Route: /instructorRoutes/courseCoordinator  
-- Request type: POST  
-- Request body: : {“courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
-- Example of how to call the route: /instructorRoutes/courseCoordinator  
-* Example for response:  
-- Functionality: it makes this academic member coordinator for this course  
-- Route: /instructorRoutes/courseCoordinator \\
-- Request type: POST <br />
-- Response: the academic member to check its rank
-
-### the method logic  
-  1) getting the course and the member from the DB   
-  2) change the course coord to be the member and the member role to be coord
-
-
-## coordiantor functionalities
-
-* Example for using request parameters:  
-- Functionality: View “slot linking” request(s) from academic members linked to his/her course.  
-- Route: /instructorRoutes/viewSlotLinkingReqs  
-- Request type: GET  
-- Request params: : nothing  
-- Example of how to call the route: /instructorRoutes/viewSlotLinkingReqs  
-* Example for response:  
-- Functionality: it gets all the slot linking requests sent to this coordinator from the database  
-- Route: /instructorRoutes/viewSlotLinkingReqs \\
-- Request type: GET <br />
-- Response: all the requests
-
-
-* Example for using request body:  
-- Functionality: accept “slot linking” request(s) from academic members linked to his/her course.  
-- Route: /instructorRoutes/acceptSlotLinking  
-- Request type: POST  
-- Request body: {"reqID:"The id of this request"}  
-- Example of how to call the route: /instructorRoutes/acceptSlotLinking  
-* Example for response:  
-- Functionality: it accepts the slot linking request and accordingly updates the member schedule and the course staff, also updates the course coverage  
-- Route: /instructorRoutes/acceptSlotLinking \\
-- Request type: POST <br />
-
-
-
-* Example for using request body:  
-- Functionality: reject “slot linking” request(s) from academic members linked to his/her course.  
-- Route: /instructorRoutes/rejecttSlotLinking  
-- Request type: POST  
-- Request body: {"reqID":"The id of this request"}  
-- Example of how to call the route: /instructorRoutes/rejecttSlotLinking  
-* Example for response:  
-- Functionality: its simply rejects the slot linking request and updates its status in the DB
-- Route: /instructorRoutes/rejecttSlotLinking \\
-- Request type: POST <br />
-
-
-* Example for using request body:  
-- Functionality: add slot to his/her course.  
-- Route: /instructorRoutes/courseSlot  
-- Request type: POST  
-- Request body: {"courseName":"CSEN704", courseSlotInfo: follow the courseSlotSchema}  
-- Example of how to call the route: /instructorRoutes/courseSlot  
-* Example for response:  
-- Functionality: Adding the slot to the course \\
-- Request type: POST <br />
-- Response: all the requests
-
-
-* Example for using request body:  
-- Functionality: delete slot to his/her course.  
-- Route: /instructorRoutes/courseSlot  
-- Request type: DELETE  
-- Request body: {"courseName":"CSEN704", courseSlotInfo: follow the courseSlotSchema}  
-- Example of how to call the route: /instructorRoutes/courseSlot  
-* Example for response:  
-- Functionality: removing the specified slot in course
-- Route: /instructorRoutes/courseSlot \\
-- Request type: DELETE <br />
 
 ## hr functionalities
 
@@ -368,66 +275,58 @@ index .js port 8080
 - Route: /hr/updateMemberSalary
 - Request type: POST
 - Request body: {“memberId” : “ac-4", “salary” : 8000}
+>>>>>>> fc95a6bf6df052bd4fc2aec56da15ddceda43808
 
-
-
-
-### Academic member functionalities
-
-- Functionality: View their schedule.
-- Route: /hr/schedule
+##Functionallity of Hod
+- Functionality: View all the requests “change day off/leave” sent by staff members in his/her department
+- Route: /HOD/Requests
 - Request type: GET
 - Request body: {}
-- Response body: Schedule slots , {"day":"MON","time":"1","location":"C7.01","courseName":"CSEN 704"}
 
-- Functionality:Send replacement request(s).
-- Route: /hr/replacementReq
-- Request type: POST
-- Request body: {"dateYear":"2020","dateMonth":"12","dateDay":"2","reason":"busy","content":"info","reciever":"academicMemberID","comment":"valid comment","slotId":"_id of the course slot","slotCourse":"CSEN 704"}
-- Response the request body
-
-- Functionality:View replacement request(s).
-- Route: /hr/replacementReq
+- Functionality: view the day off of all the staff in his/her department
+- Route: /HOD/viewstaffdayoff
 - Request type: GET
 - Request body: {}
-- Response the requests body that the logged in sent or recieved
 
-
-- Functionality:Send a slot linking request (automatically sent to course coordinator).
-- Route: /hr/slotLinkReq
-- Request type: POST
-- Request body: {"reason":"busy","content":"info","comment":"comment","slotId":"_id of the course slot","slotCourse":"CSEN 704"}
-- Response the request body
-
-
-- Functionality:Change their day off by sending a change day off request (automatically sent to HOD),
-and optionally leave a reason.
-- Route: /hr/changeDayOffReq
-- Request type: POST
-- Request body: {"reason":"busy","content":"info","comment":"comment","newDayOff":"MON"}
-- Response the requests body that the logged in sent or recieved
-
-- Functionality:View the status of all submitted requests. They can also view only the accepted requests,
-only the pending requests or only the rejected requests.
-- Route: /hr/requests
+- Functionality: view the day off of  a single staff in his/her department
+- Route: /HOD/viewstaffdayoff/:StaffId
 - Request type: GET
-- Request body: {"filter":"pending or accepted or rejected or empty"}
-- Response the requests body that the logged in sent or recieved
+- Request body: {}
 
+* Functionality:AssignCourseInstructor
+ * Route:/HodRoutes/AssignCourseInstructor
+ * Request type:post
+ - Request body: {“memberid” : “ac-4", courseName: "CSEN 777"  }
 
-- Functionality:Cancel a still pending request or a request whose day is yet to come.
-- Route: /hr/cancelReq
+ * Example of how to call the route:invoke it 
+ * Example for response: assigned instructor
+ 
+ - Functionality: Reject a request, and optionally leave a comment as to why this request was rejected.
+- Route: /Hod/Requests
 - Request type: POST
-- Request body: {"_id":"_id of the request"}
-- Response the requests body that the logged in sent or recieved
-
-- Functionality:Submit any type of leave request (automatically sent to HOD).
-- Route: /hr/submitLeaves
-- Request type: POST
-- Request body: {"dateYear":"2020","dateMonth":"12","dateDay":"10","reason":"valid reason","content":"info","comment":"comment","type":"type of leave(annual or sick or compensation ...)"}
-- Response the requests body that the logged in sent or recieved
-=======
->>>>>>> a91ad1b96360a89aafd818c22d51b56450409440
+- Request body: {“id” : “ac-4", department: "CSEN" , statusType:"accepted/rejected" }
 
 
+- Functionality: View the coverage of each course in his/her department.
+- Route: /Hod/viewcoverageofcourses
+- Request type: GET
+- Request body: {“memberId” : “ac-4"}
 
+
+- Functionality: View teaching assignments (which staff members teach which slots) of course offered by
+his department.
+- Route: /Hod/viewteachingassignments
+- Request type: GET
+- Request params: nothing
+
+Functionality: View the staff in my department
+Route: /hr/viewallstaffInMyDepartment
+Request type: GET
+Parameters: nothing
+Request body: nothing
+
+Functionality: View the staff for my course
+Route: /hr/viewallstaffforThisCourse/:CourseName
+Request type: GET
+Parameters: CourseName is the name of the course whose staff I want to view
+Request body: nothing
