@@ -3,6 +3,11 @@ const {slotSchema} = require('./slotSchema');
 
 //  GUC Staff Members
 const memberSchema = mongoose.Schema({
+    bio:
+    {
+        type:String,
+    },
+  
     name:
     {
         type:String,
