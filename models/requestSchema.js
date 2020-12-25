@@ -50,6 +50,11 @@ const requestSchema=mongoose.Schema({
     newDayOff:{
         type:String
     },
+    //in case of annual leave
+    leavingDate:{ 
+        type: Date // year, month, day OR Number and the result og get time in case that == does not gets the value of
+    }
+    ,
     //in case of annual leave and found a replacement
     Replacements:{
         type:Array

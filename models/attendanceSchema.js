@@ -7,11 +7,11 @@ const attendanceSchema=mongoose.Schema({
         type:String,
         required: true
       },
-    date:{type:Date,
+    date:{type:Date, // year, month, day OR Number and the result og get time in case that == does not gets the value of
       required:true,
     },
     sessions:[signInSessionSchema],
-    missingMinutes:
+    missingMinutes: // will be for both missing/ extra hours
     {
       type:Number,
       default:504
