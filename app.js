@@ -1,5 +1,6 @@
 const express = require('express');
 app = express();
+var Authroutes = require("./routes/AuthRoutes")
 var HODroutes = require("./routes/HodRoutes")
 var HRroutes = require("./routes/HRRoutes")
 var AnyAcademic=require("./routes/AnyAcademic")
@@ -11,6 +12,19 @@ const memberRoutes=require('./routes/memberRoutes')
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
+
+app.use('',Authroutes);
+
+app.use(async (req,res, next) =>{
+    const token = req.headers.token;
+
+    if(!token){
+        res.status(401).send("ya kalb");
+    }
+    req.user = jwt.verify(token, process.env.TOKEN_SECRET);
+    next();
+})
+
 app.use("/Hod",HODroutes);
 app.use("/hr",HRroutes);
 app.use("/anyAcademic",AnyAcademic);
