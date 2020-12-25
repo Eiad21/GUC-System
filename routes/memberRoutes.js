@@ -171,6 +171,7 @@ router.route('/signIn')
        else{
             console.log('session added')
             sess.sessions.push(temp);
+            sess.missedDay = false;
             await sess.save();
             res.send(sess);
 
@@ -240,17 +241,9 @@ router.route('/signOut')
                     await sess.save();
                     res.send('time out slot added ') 
                  }
-        }
-        
-    }
-                        
-                    
+        }   
+    }                    
 )
-
-
-
-
-
 
 router.route('/viewAttendance')
   
@@ -298,10 +291,14 @@ router.post('/viewMyAttendance', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
     const sessionsMissed = 
-        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0,missedDay:1});
+        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0});
     //console.log(timeArray)
 
-  
+    let sum=0;
+    for (i in sessionsMissed) 
+    {
+        sum=sum+timeArray[i].missingMinutes
+    }
 
    // console.log(sum)
     res.send(sessionsMissed)
