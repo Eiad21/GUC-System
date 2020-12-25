@@ -68,7 +68,7 @@ router.get('/viewCoverages', async (req,res)=>{
     res.send(coverages);
 })
 
-// input member
+
 router.get('/viewCoursesAssignments', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
@@ -109,7 +109,7 @@ router.get('/viewOneCourseAssignments/:courseName', async (req,res)=>{
     res.send(course.courseSchedule);
 })
 
-//input member
+
 router.get('/viewDepartmentStaff', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware

@@ -76,7 +76,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
     //     return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     // }
     course.courseSchedule.forEach(async(slot,idx)=>{
-        if(slot.slotID == slotLinkingReq.slotID)
+        if(slot._id == slotLinkingReq.slotID)
         {
             // // check the following or assume already handled
             // if(slot.assignedMemberID)
@@ -85,7 +85,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
             // }
             const TA = await MemberModel.findOne({memberId:slotLinkingReq.sender});
             course.courseSchedule[idx]={
-                slotID: slot.slotID,
+                slotID: slot._id,
                 day: slot.day,
                 time: slot.time,
                 location: slot.location,

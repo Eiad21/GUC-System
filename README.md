@@ -1,12 +1,12 @@
 # GUC-System
 
-## file to run the project and port listening
+# file to run the project and port listening
 
 index .js port 8080
 
-## functionalities description
+# functionalities description
 
-### GUC Staff Members Functionalities
+## GUC Staff Members Functionalities
 
 
  * Functionality:Log in with a unique email and a password.
@@ -75,32 +75,106 @@ index .js port 8080
 
 
 
-### instructor functionalities
+## instructor functionalities
 
-  
-- Functionality: View the coverage of course(s) he/she is assigned to.
-- Route: /InstructorRoutes/viewCoverages
-- Request type: GET
-- Parameters: nothing
-- Example of how to call the route: /InstructorRoutes/viewCoverages
-- Example for response:
-  Functionality: get all coverages of all course(s)
-  Route: /InstructorRoutes/viewCoverages
-  Request type: GET
-  Response: Array of coverages . Example of a single coverage: { “courseName” : coverage}
+* Example for using request parameters:  
+- Functionality: View the coverage of course(s) he/she is assigned to.  
+- Route: /instructorRoutes/viewCoverages  
+- Request type: GET  
+- Parameters: nothing  
+- Example of how to call the route: /instructorRoutes/viewCoverages  
+* Example for response:  
+- Functionality: get all coverages of all course(s)  
+- Route: /instructorRoutes/viewCoverages \\
+- Request type: GET <br />
+- Response: Array of coverages . Example of a single coverage: { “courseName” : coverage}
+###
+  - the method logic  
+  1) Get all the courses that the signed in member is instructor of  
+  2) for each course of them:
+      * compute the coverage = assigned slots so far / total slots
+      * push the computed coverag in the array of result
 
-- Functionality: View the coverage of course(s) he/she is assigned to.
-- Route: /InstructorRoutes/viewCoverages
-- Request type: GET
-- Parameters: nothing
-- Example of how to call the route: /InstructorRoutes/viewCoverages
-- Example for response:  
-   Functionality: get all coverages of all course(s)  
-   Route: /InstructorRoutes/viewCoverages \\
-  Request type: GET <br />
-  Response: Array of coverages . Example of a single coverage: { “courseName” : coverage}
 
-### hr functionalities
+
+* Example for using request parameters:  
+- Functionality: View the slots’ assignment of course(s) he/she is assigned to  
+- Route: /instructorRoutes/viewCoursesAssignments  
+- Request type: GET  
+- Parameters: nothing  
+- Example of how to call the route: /instructorRoutes/viewCoursesAssignments  
+* Example for response:  
+- Functionality: view all the slots and the assigned academic member for all the course(s) of this instructor  
+- Route: /instructorRoutes/viewCoursesAssignments \\
+- Request type: GET <br />
+- Response: returns the courses schedules (for each course (all the course slots and their assigned acad. member)) . Example of a single course schedule: {courseName:courseName,schedule:courseSchedule}
+### the method logic  
+  1) Get all the courses that the signed in member is instructor of  
+  2) for each course of them:
+      * get the schedule of it (all its teaching slots + information about the assigned member)
+      * push the schedule in the array of result
+### Also there is a version of the above functionality that takes the courseName of a specific course (in req.params) and only returns the schedule of this course after checking that the instructor is authorized to do so (one of the academic member of the course)
+
+* Example for using request parameters:  
+- Functionality: View all the staff in his/her department or per course along with their profiles.  
+- Route: /instructorRoutes/viewDepartmentStaff  
+- Request type: GET  
+- Parameters: nothing  
+- Example of how to call the route: /instructorRoutes/viewDepartmentStaff  
+* Example for response:  
+- Functionality: all the staff members in the department will be returned along with their non confidential info as (id, name, mail, office location, .. etc)  
+- Route: /instructorRoutes/viewDepartmentStaff \\
+- Request type: GET <br />
+- Response: all the department staff information example of a member: {id:memID,name:memName , ......}
+
+### the method logic  
+  1) Get the department of the signed in instructor  
+  2) return the saved array for staff of the department
+
+### Also there is a version of the above functionality that takes the courseName of a specific course (in req.params) and only returns the staff of this course after checking that the instructor is authorized to do so (one of the academic member of the course) by route --> /viewCourseStaff/:courseName
+
+
+
+* Example for using request parameters:  
+- Functionality: Assign an academic member to an unassigned slots in course(s) he/she is assigned to.  
+- Route: /instructorRoutes/slotAcadMember  
+- Request type: POST  
+- Request body: : { “academicMemberID” : “ac_1”, “courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
+- Example of how to call the route: /instructorRoutes/slotAcadMember  
+* Example for response:  
+- Functionality: it assigns this academic member to this course slot and accordingly changes both the schedule of the academic member, the course coverage, course assignment  
+- Route: /instructorRoutes/slotAcadMember \\
+- Request type: POST <br />
+- Response: the academic member document to check for correct updating for its schedule
+
+### the method logic  
+  1) checking for the availibity of the assignment and doing data validation for the input data  
+  2) make the academic member the assigned member to this slot
+  3) increase the number of assigned slots to this course
+  4) add this slot to the member schedule after checking if there is any collision (another slot at same timing and location) in the schedule
+
+
+* Example for using request parameters:  
+- Functionality: delete an academic member to an assigned slots in course(s) he/she is assigned to.  
+- Route: /instructorRoutes/slotAcadMember  
+- Request type: POST  
+- Request body: : { “academicMemberID” : “ac_1”, “courseName”: “CSEN704”, “slotID”: _id value of the course slot }  
+- Example of how to call the route: /instructorRoutes/slotAcadMember  
+* Example for response:  
+- Functionality: it assigns this academic member to this course slot and accordingly changes both the schedule of the academic member, the course coverage, course assignment  
+- Route: /instructorRoutes/slotAcadMember \\
+- Request type: POST <br />
+- Response: the academic member document to check for correct updating for its schedule
+
+### the method logic  
+  1) checking for the availibity of the assignment and doing data validation for the input data  
+  2) make the academic member the assigned member to this slot
+  3) increase the number of assigned slots to this course
+  4) add this slot to the member schedule after checking if there is any collision (another slot at same timing and location) in the schedule
+
+
+
+## hr functionalities
 
 - Functionality: add a location to the system
 - Route: /hr/addLocation
