@@ -5,17 +5,17 @@ const FacultyModel = require("../models/facultySchema").constructor;
 const MemberModel = require("../models/memberSchema").constructor;
 
 // Instructor Routes
-const getDepartmentsInFac = async function(facultyName){
-    const fac =await FacultyModel.findOne({facultyName: facultyName});
+const getDepartmentsInFac =async function(facultyName){
+    const fac =await FacultyModel.findOne({facultyName: facultyName})
     return fac.departments;
 };
-const getCoursesInDep = function(facultyName,departmentName){
-    const deps = getDepartmentsInFac(facultyName);
+const getCoursesInDep = async function(facultyName,departmentName){
+    const deps = await getDepartmentsInFac(facultyName);
     const department = deps.find(dep => dep.departmentName == departmentName);
     return department.courses;
 };
 const isInstructorOfCourse = function(course,instructorID){
-    const instructor = course.instructors.find(inst => inst.memberID == instructorID);
+    const instructor = course.instructors.find(inst => inst.id === instructorID);
     if(instructor)
     {
         // exist
@@ -48,19 +48,20 @@ const getStaffOfDep = function(facultyName,departmentName){
 router.get('/viewCoverages', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.role != "instructor")
+    if(/*req.signedMember.MemberRank*/"instructor" != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
-    const depCourses = getCoursesInDep(facultyName,departmentName);
-    const coverages = {};
+    const facultyName = "MET";//req.signedMember.facultyName;
+    const departmentName ="csen";// req.signedMember.departmentName;
+    const depCourses = await getCoursesInDep(facultyName,departmentName);
+    const coverages = [];
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,req.signedMember.memberID))
+        if(isInstructorOfCourse(course,"ac_7"/*req.signedMember.memberID*/))
         {
             const {courseName,assignedCount} = course;
-            coverages[courseName] = (assignedCount*1.0/course.courseSchedule.length) * 100;
+            const cur = (assignedCount*1.0/course.courseSchedule.length) * 100;
+            coverages.push({CourseName: courseName, Coverage:cur})
         }
     });
     res.send(coverages);
@@ -133,11 +134,11 @@ router.get('/viewCourseStaff/:courseName', async (req,res)=>{
     const departmentName = req.signedMember.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
     const course = depCourses.find(course => course.courseName == req.params.courseName);
-    if(!isInstructorOfCourse(course,req.signedMember.memberID))
-    const staffInfo = {
-        instructors: course.instructors,
-        TAs: course.TAs
-    };
+    // if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    // const staffInfo = {
+    //     instructors: course.instructors,
+    //     TAs: course.TAs
+    // };
     res.send(staffInfo);
 })
 
@@ -168,7 +169,7 @@ router.post('/slotAcadMember', async (req,res)=>{
     {
         return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
-    course.courseSchedule.forEach((slot,idx)=>{
+    course.courseSchedule.forEach(async (slot,idx)=>{
         if(slot.slotID == req.body.slotID)
         {
             if(slot.assignedMemberID)
@@ -235,7 +236,7 @@ router.delete('/slotAcadMember', async (req,res)=>{
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
-    course.courseSchedule.forEach((slot,idx)=>{
+    course.courseSchedule.forEach(async (slot,idx)=>{
         if(slot.slotID == req.body.slotID)
         {
             if(!slot.assignedMemberID)
@@ -306,7 +307,7 @@ router.put('/slotAcadMember', async (req,res)=>{
     {
         return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
-    course.courseSchedule.forEach((slot,idx)=>{
+    course.courseSchedule.forEach(async (slot,idx)=>{
         if(slot.slotID == req.body.slotID)
         {
             if(!slot.assignedMemberID)
