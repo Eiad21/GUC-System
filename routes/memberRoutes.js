@@ -298,14 +298,10 @@ router.post('/viewMyAttendance', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
     const sessionsMissed = 
-        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0});
+        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0,missedDay:1});
     //console.log(timeArray)
 
-    let sum=0;
-    for (i in sessionsMissed) 
-    {
-        sum=sum+timeArray[i].missingMinutes
-    }
+  
 
    // console.log(sum)
     res.send(sessionsMissed)

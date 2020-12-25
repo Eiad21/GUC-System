@@ -23,11 +23,11 @@ router.get('/viewSlotLinkingReqs', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.user.facultyName;
+    const facultyName = req.user.Facultyname;
     const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberID);
 
     allRequests={};
     coursesCoordinated.forEach(async(course)=>{
@@ -47,11 +47,11 @@ router.post('/acceptSlotLinking', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.user.facultyName;
+    const facultyName = req.user.Facultyname;
     const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.Id);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberID);
 
     const slotLinkingReq = await RequestModel.findOne({reqID: req.body.reqID});
     if(!slotLinkingReq)
@@ -79,11 +79,11 @@ router.post('/acceptSlotLinking', async (req,res)=>{
         if(slot.slotID == slotLinkingReq.slotID)
         {
             // // check the following or assume already handled
-            // if(slot.assignedMemberID)
-            // {
-            //    return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
-            // }
-            const TA = await MemberModel.findOne({memberId:slotLinkingReq.sender});
+            if(slot.assignedMemberID)
+            {
+               return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
+            }
+            const TA = await MemberModel.findOne({memberID:slotLinkingReq.sender});
             course.courseSchedule[idx]={
                 slotID: slot.slotID,
                 day: slot.day,
@@ -133,8 +133,8 @@ router.post('/rejecttSlotLinking', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.user.facultyName;
-    const departmentName = req.user.departmentName;
+    const facultyName = req.signedMember.Facultyname;
+    const departmentName = req.signedMember.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
@@ -164,8 +164,8 @@ router.post('/courseSlot', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.user.facultyName;
-    const departmentName =req.user.departmentName;
+    const facultyName = req.user.Facultyname;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
@@ -211,7 +211,7 @@ router.delete('/courseSlot', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.user.facultyName;
+    const facultyName = req.user.Facultyname;
     const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
