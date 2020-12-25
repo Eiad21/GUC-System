@@ -6,11 +6,7 @@ const MemberModel = require("../models/memberSchema").constructor;
 const RequestModel = require("../models/requestSchema").constructor;
 const CourseSlotModel = require("../models/courseSlotSchema").constructor;
 
-// Instructor Routes
-const getDepartmentsInFac = async function(facultyName){
-    const fac =await FacultyModel.findOne({facultyName: facultyName});
-    return fac.departments;
-};
+
 
 
 const getCoursesCoordinated = function(depCourses, coordiantorID){
@@ -23,15 +19,15 @@ const getCoursesCoordinated = function(depCourses, coordiantorID){
 router.get('/viewSlotLinkingReqs', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.MemberRank != "coordinator")
+    if(req.user.MemberRank != "coordinator")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.signedMember.memberID);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     allRequests={};
     coursesCoordinated.forEach(async(course)=>{
@@ -47,15 +43,15 @@ router.get('/viewSlotLinkingReqs', async (req,res)=>{
 router.post('/acceptSlotLinking', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.MemberRank != "coordinator")
+    if(req.user.MemberRank != "coordinator")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.signedMember.memberID);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.Id);
 
     const slotLinkingReq = await RequestModel.findOne({reqID: req.body.reqID});
     if(!slotLinkingReq)
@@ -87,13 +83,13 @@ router.post('/acceptSlotLinking', async (req,res)=>{
             // {
             //    return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
             // }
-            const TA = await MemberModel.findOne({memberID:slotLinkingReq.sender});
+            const TA = await MemberModel.findOne({memberId:slotLinkingReq.sender});
             course.courseSchedule[idx]={
                 slotID: slot.slotID,
                 day: slot.day,
                 time: slot.time,
                 location: slot.location,
-                assignedMemberID: TA.memberID,
+                assignedMemberID: TA.memberId,
                 assignedMemberName: TA.name
             };
             course.assignedCount = course.assignedCount+1;
@@ -133,15 +129,15 @@ router.post('/acceptSlotLinking', async (req,res)=>{
 router.post('/rejecttSlotLinking', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.MemberRank != "coordinator")
+    if(req.user.MemberRank != "coordinator")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, req.signedMember.memberID);
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     const slotLinkingReq = await RequestModel.findOne({reqID: req.body.reqID});
     if(!slotLinkingReq)
@@ -164,15 +160,15 @@ router.post('/rejecttSlotLinking', async (req,res)=>{
 router.post('/courseSlot', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.MemberRank != "coordinator")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.MemberRank != "coordinator")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, /*req.signedMember.memberID*/"ac_77");
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
     
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
     
@@ -211,15 +207,15 @@ router.post('/courseSlot', async (req,res)=>{
 router.delete('/courseSlot', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.MemberRank != "coordinator")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.MemberRank != "coordinator")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
-    const coursesCoordinated = getCoursesCoordinated(department.courses, /*req.signedMember.memberID*/"ac_77");
+    const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
     if(!course)
