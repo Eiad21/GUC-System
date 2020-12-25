@@ -368,4 +368,6 @@ index .js port 8080
 - Route: /hr/updateMemberSalary
 - Request type: POST
 - Request body: {“memberId” : “ac-4", “salary” : 8000}
->>>>>>> fc95a6bf6df052bd4fc2aec56da15ddceda43808
+
+
+
