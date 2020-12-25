@@ -59,8 +59,8 @@ router.get('/viewCoverages', async (req,res)=>{
     depCourses.forEach((course)=>{
         if(isInstructorOfCourse(course,req.signedMember.memberID))
         {
-            const {courseName,coverage} = course;
-            coverages[courseName] = coverage;
+            const {courseName,assignedCount} = course;
+            coverages[courseName] = (assignedCount*1.0/course.courseSchedule.length) * 100;
         }
     });
     res.send(coverages);
@@ -183,6 +183,7 @@ router.post('/slotAcadMember', async (req,res)=>{
                 assignedMemberID: req.body.assignedMemberID,
                 assignedMemberName: req.body.assignedMemberName
             };
+            course.assignedCount = course.assignedCount+1;
             // update the schedule of this member ---> adding this slot to it
             const member = await MemberModel.findOne({memberID: req.body.assignedMemberID});
             const tailoredSlot = {
@@ -201,6 +202,7 @@ router.post('/slotAcadMember', async (req,res)=>{
             await member.save();
         }
     });
+    
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
         {
@@ -251,6 +253,7 @@ router.delete('/slotAcadMember', async (req,res)=>{
                 assignedMemberID: null,
                 assignedMemberName: null
             };
+            course.assignedCount = course.assignedCount-1;
             // update the schedule of this member ---> adding this slot to it
             const member = await MemberModel.findOne({memberID: oldAssignedMemberID});
             member.schedule = member.schedule.filter((memSlot)=>{
@@ -308,8 +311,8 @@ router.put('/slotAcadMember', async (req,res)=>{
         {
             if(!slot.assignedMemberID)
             {
-                //return res.status(401).send("This slot is already unassigned!");
-                //or
+                return res.status(401).send("This slot is already unassigned!");
+                //or course.assignedCount = course.assignedCount+1;
                 //do nothing
             }
             else
@@ -439,9 +442,18 @@ router.delete('/courseAcadMember', async (req,res)=>{
         //or
         //return res.status(200).send();
     }
+    let oldLen = TA.schedule;
+    TA.schedule = TA.schedule.filter(s =>{
+        return !(s.courseName == course.courseName)
+    });
+    let newLen = TA.schedule;
+    course.assignedCount = course.assignedCount - (oldLen-newLen);
     course.TAs = course.TAs.filter(t => {
         return !(t.id == TA.memberID && t.name == TA.name && t.mail == TA.email && t.office == TA.officeLocation);
     });
+    course.courseSchedule = course.courseSchedule.filter(cSlot =>{
+        return !(cSlot.assignedMemberID == TA.memberID);
+    })
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
         {

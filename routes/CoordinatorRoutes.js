@@ -11,40 +11,6 @@ const getDepartmentsInFac = async function(facultyName){
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     return fac.departments;
 };
-const getCoursesInDep = function(facultyName,departmentName){
-    const deps = getDepartmentsInFac(facultyName);
-    const department = deps.find(dep => dep.departmentName == departmentName);
-    return department.courses;
-};
-const isInstructorOfCourse = function(course,instructorID){
-    const instructor = course.instructors.find(inst => inst.memberID == instructorID);
-    if(instructor)
-    {
-        // exist
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-};
-const isTAOfCourse = function(course,TAID){
-    const TA = course.TAs.find(t => t.memberID == TAID);
-    if(TA)
-    {
-        // exist
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-};
-const getStaffOfDep = function(facultyName,departmentName){
-    const deps = getDepartmentsInFac(facultyName);
-    const department = deps.find(dep => dep.departmentName == departmentName);
-    return department.staff;
-};
 
 
 const getCoursesCoordinated = function(depCourses, coordiantorID){
@@ -130,6 +96,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
                 assignedMemberID: TA.memberID,
                 assignedMemberName: TA.name
             };
+            course.assignedCount = course.assignedCount+1;
             const tailoredSlot = {
                 day:slot.day,
                 time:slot.time,
@@ -262,7 +229,12 @@ router.delete('/courseSlot', async (req,res)=>{
     // {
     //     return res.status(404).send("Not found!");
     // }
-    course.courseSchedule= course.courseSchedule.filter(slot => slot.slotID != req.body.slotID);;
+    const deletedSlot= course.courseSchedule.find(slot => slot.slotID == req.body.slotID);
+    if(deletedSlot.assignedMemberID)
+    {
+        res.status(406).send("Cannot delete slot with assigned academic member, you should deassign him/her first");
+    }
+    course.courseSchedule= course.courseSchedule.filter(slot => slot.slotID != req.body.slotID);
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
         {

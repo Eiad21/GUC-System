@@ -8,7 +8,7 @@ const courseSchema=mongoose.Schema({
     required:true,
     unique:true
   },
-  coverage:
+  assignedCount:
   {
     type:Number,
     required:true
