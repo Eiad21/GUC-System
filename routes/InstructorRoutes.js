@@ -1,9 +1,8 @@
 const express = require("express")
 const router = express.Router();
-// const Location = require("../models/locationSchema").constructor
+
 const FacultyModel = require("../models/facultySchema").constructor;
 const MemberModel = require("../models/memberSchema").constructor;
-// const Department = require("../models/departmentSchema").constructor
 
 // Instructor Routes
 const getDepartmentsInFac = async function(facultyName){

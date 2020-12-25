@@ -233,7 +233,7 @@ router.route('/signOut')
                 memberId:req.body.memberId,
                 date:dateoz,
                 sessions:[temp],
-                missingMinutes:120,
+                missingMinutes:504,
                 missedDay:true
 
             });
