@@ -4,6 +4,80 @@
   index .js        port 8080
 ## functionalities description
 
+### GUC Staff Members Functionalities
+
+
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ * Functionality:
+ * Route:
+ * Request type:
+ * Parameters:
+ * Example of how to call the route:
+ * Example for response:
+ 
+ 
+ 
 ### instructor functionalities
 
   
