@@ -53,72 +53,73 @@ router.route('/logOut')
 router.route('/viewProfile')
 .get(async (req, res )=>{
     
-    res.redirect('/profile');
-    res.send(req.header.token);
+   // res.redirect('/profile');
+    res.send(req.user);
 }
     )
 
-router.route('/updateProfile')
-.get(async (req, res )=>{
+// router.route('/updateProfile')
+// .get(async (req, res )=>{
         
-    res.redirect('/updateProfile');
-}
-    )
-    router.route('/doneReturn')
-    .get(async (req, res )=>{
+//     res.redirect('/updateProfile');
+// }
+//     )
+    // router.route('/doneReturn')
+    // .get(async (req, res )=>{
             
-        res.redirect('/');
-    }
-        )
+    //     res.redirect('/');
+    // }
+    //     )
 
 
 
- router.route('/updateEmail')
-    .put(async (req, res )=>{
+ router.route('/updateProfile')
+    .post(async (req, res )=>{
  
-        memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
-            
-                if(!err)
-                mem.name = request.body.name;
-               else res.send("error user not found"+err);
-                }
+        let memberoz= memberSchema.findOne( 
+           
+            {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
+
+                memberoz.bio=req.body.bio;
+                await memberoz.save();
+                res.send('done')
             }
         
     
         )
 
-        router.route('/updateEmail')
-        .put(async (req, res )=>{
-     
-            memberSchema.findOne({memberId: request.body.memberId}, function(err, mem) {
-                
-                    if(!err)
-                    mem.name = request.body.name;
-                   else res.send("error user not found"+err);
-                    }
-                    );
-                }
-            
-        
-            )
+   
  
 router.route('/updatePassword')
   
 
 .put(async (req, res )=>{
     const salt= await  bcrypt.genSalt(10)
-    let temp= await  bcrypt.hash(req.body.password, salt) 
+  //  const correctpassword= await bcrypt.compare(req.body.password, user.password)
+
         if(! req.body.password){
             res.send('You must sign up with password')
         }
-          memberSchema.findOne( {memberId: request.body.memberId}, function(err, mem) {
+        let temp= await  bcrypt.hash(req.body.password, salt) 
+
+         let memberoz= memberSchema.findOne( 
+            //  {memberId: request.body.memberId}, function(err, mem) {
            
-                if(!err)
-                mem.password = temp;
-               else res.send("error user not found"+err);
-                }
+            //     if(!err)
+            //     mem.password = temp;
+            //    else res.send("error user not found"+err);
+            //     }
+            {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
+
+                if(await bcrypt.compare(req.body.oldPassword, memberoz.password)){
+                    memberoz.password=temp;
+                     await memberoz.save();
+                     res.send('done password chaneged')
+                }
+
+                else{res.send('enter correct password ')}
             }
         
     
@@ -201,7 +202,6 @@ router.route('/signOut')
             // }
             {$and:[{date:dateoz},{memberId:req.user.memberId}]}
             );
-            console.log(sess+' h hh h h h h  h h h  h h h h  h h h')
         if(!sess){
             console.log('day added')
 
