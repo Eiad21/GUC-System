@@ -37,7 +37,7 @@ setInterval(async function() {
                                                             status:"accepted",
                                                             leavingDate:dateNow.getTime()});
 
-        if(leavingRequests.array.length == 0) // no accepted leave request
+        if(leavingRequests.length == 0) // no accepted leave request
         {
             const missingMinutes = computeMissingMinutes(attRecord.sessions);
             if(missingMinutes == 504)
@@ -108,7 +108,7 @@ setInterval(async function() {
                                                             status:"accepted",
                                                             leavingDate:dateNow.getTime()});
 
-        if(leavingRequests.array.length == 0) // no accepted leave request
+        if(leavingRequests.length == 0) // no accepted leave request
         {
             const missingMinutes = computeMissingMinutes(attRecord.sessions);
             if(missingMinutes == 504)
@@ -131,7 +131,7 @@ setInterval(async function() {
         
     });    
     
-},86400000/*24 hours*/ );
+},86400000*30 );
 
 // setInterval(async function() {
 //     await console.log("bye1");
