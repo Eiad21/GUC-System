@@ -712,7 +712,9 @@ router.post('/addNewSignRecord', async (req,res)=>{
 })
 
 router.post('/viewStaffAttendance', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     Attendance.findOne(
         {memberId:req.body.memberId}
     )
@@ -730,7 +732,7 @@ router.post('/viewStaffAttendance', async (req,res)=>{
 );
 })
 
-router.post('/viewMembersMissingTime', async (req,res)=>{
+router.get('/viewMembersMissingTime', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
     if(req.user.MemberRank != "hr"){
@@ -752,13 +754,16 @@ router.post('/updateMemberSalary', async (req,res)=>{
     if(!req.body.memberId){
         return res.status(400).send("Bad request");
     }
+    if(!req.body.salary){
+        return res.status(400).send("Bad request");
+    }
+    if(req.body.memberId === req.user.memberId){
+        return res.status(401).send("Access denied!");
+    }
     Member.findOne(
         {memberId:req.body.memberId})
     .then((doc) =>{
         if(doc){
-            if(!req.body.salary){
-                return res.status(400).send("Bad request");
-            }
             doc.salary = req.body.salary;
             doc.save()
             .then((doc) =>{
