@@ -49,16 +49,16 @@ const getStaffOfDep = async function(facultyName,departmentName){
 router.get('/viewCoverages', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.MemberRank != "instructor")
+    if(req.user.MemberRank != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName =req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const coverages = [];
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,req.signedMember.memberID))
+        if(isInstructorOfCourse(course,req.user.memberID))
         {
             const {courseName,assignedCount} = course;
             const cur = (assignedCount*1.0/course.courseSchedule.length) * 100;
@@ -76,12 +76,12 @@ router.get('/viewCoursesAssignments', async (req,res)=>{
     // {
     //     return res.status(401).send("Access denied!");
     // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const schedules = [];
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,"ac_7"/*req.signedMember.memberID*/))
+        if(isInstructorOfCourse(course,req.user.memberID))
         {
             const {courseName,courseSchedule} = course;
             schedules.push({courseName:courseName,schedule:courseSchedule});
@@ -94,15 +94,15 @@ router.get('/viewCoursesAssignments', async (req,res)=>{
 router.get('/viewOneCourseAssignments/:courseName', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const course = depCourses.find(cou => cou.courseName === req.params.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberID*/"ac_7"))
+    if(!isInstructorOfCourse(course,req.user.memberID))
     {
         return res.status(401).send("Not authorized to view this course!");
     }
@@ -113,12 +113,12 @@ router.get('/viewOneCourseAssignments/:courseName', async (req,res)=>{
 router.get('/viewDepartmentStaff', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const depStaff = await getStaffOfDep(facultyName,departmentName);
     res.send(depStaff);
 });
@@ -127,22 +127,22 @@ router.get('/viewDepartmentStaff', async (req,res)=>{
 router.get('/viewCourseStaff/:courseName', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
-    const depCourses = await getCoursesInDep(facultyName,departmentName);
-    const course = depCourses.find(course => course.courseName == req.params.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberID*/"ac_7")){
+    if(req.user.role != "instructor")
+    {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
+    const depCourses = await getCoursesInDep(facultyName,departmentName);
+    const course = depCourses.find(course => course.courseName == req.params.courseName);
+    if(!isInstructorOfCourse(course,req.user.memberID)){
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const depCourses = getCoursesInDep(facultyName,departmentName);
     const course = depCourses.find(course => course.courseName == req.params.courseName);
-    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberID))
      {
 
      }
@@ -161,22 +161,22 @@ router.get('/viewCourseStaff/:courseName', async (req,res)=>{
 router.post('/slotAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
 
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberID*/"ac-2"))
+    if(!isInstructorOfCourse(course,req.user.memberID))
     {
         return res.status(401).send("You are not authorized to modify this course!");
     }
     // checking that the TA is of same department && from course staff
-    const TA =await MemberModel.findOne({memberId: req.body.assignedMemberID});
+    const TA =await MemberModel.findOne({memberId: req.body.user});
    
     if(TA.departmentName != departmentName)
     {
@@ -189,7 +189,7 @@ router.post('/slotAcadMember', async (req,res)=>{
     course.courseSchedule.forEach(async (slot,idx)=>{
         if(slot._id == req.body.slotID)
         {
-            if(slot.assignedMemberID)
+            if(slot.user)
             {
                return res.status(406).send("This slot is already assigned, you can delete its assigment first!");
             }
@@ -246,16 +246,16 @@ router.post('/slotAcadMember', async (req,res)=>{
 router.delete('/slotAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberId*/"ac_7"))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
@@ -313,16 +313,16 @@ router.delete('/slotAcadMember', async (req,res)=>{
 router.put('/slotAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.role != "instructor")
+    if(req.user.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberID))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
@@ -400,16 +400,16 @@ router.put('/slotAcadMember', async (req,res)=>{
 router.post('/courseAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberId*/"ac_7"))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not authorized to modify this course!");
     }
@@ -455,16 +455,16 @@ router.post('/courseAcadMember', async (req,res)=>{
 router.delete('/courseAcadMember', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberId*/"ac_7"))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
@@ -515,16 +515,16 @@ router.delete('/courseAcadMember', async (req,res)=>{
 router.post('/courseCoordinator', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.signedMember.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
-    const facultyName = "MET";//req.signedMember.facultyName;
-    const departmentName ="csen";// req.signedMember.departmentName;
+    if(req.user.role != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
+    const facultyName = req.user.facultyName;
+    const departmentName =req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberId*/"ac_7"))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not authorized to modify this course!");
     }
@@ -567,16 +567,16 @@ router.post('/courseCoordinator', async (req,res)=>{
 router.delete('/courseCoordinator', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.role != "instructor")
+    if(req.user.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberID))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
@@ -616,16 +616,16 @@ router.delete('/courseCoordinator', async (req,res)=>{
 router.put('/courseCoordinator', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.signedMember.role != "instructor")
+    if(req.user.role != "instructor")
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.signedMember.facultyName;
-    const departmentName = req.signedMember.departmentName;
+    const facultyName = req.user.facultyName;
+    const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.signedMember.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberID))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
