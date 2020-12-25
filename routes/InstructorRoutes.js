@@ -5,29 +5,29 @@ const router = express.Router();
 // const MemberModel = require("../models/memberSchema").constructor;
 
 // // Instructor Routes
-// const getDepartmentsInFac =async function(facultyName){
-//     const fac =await FacultyModel.findOne({facultyName: facultyName})
-//     return fac.departments;
-// };
-// const getCoursesInDep = async function(facultyName,departmentName){
-//     const deps = await getDepartmentsInFac(facultyName);
-//     const department = deps.find(dep => dep.departmentName == departmentName);
-//     return department.courses;
-// };
-// const isInstructorOfCourse = function(course,instructorID){
-//     const instructor = course.instructors.find(inst => inst.id === instructorID);
-//     if(instructor)
-//     {
-//         // exist
-//         return true;
-//     }
-//     else
-//     {
-//         return false;
-//     }
-// };
-// const isTAOfCourse = function(course,TAID){
-//     const TA = course.TAs.find(t => t.id == TAID);
+const getDepartmentsInFac =async function(facultyName){
+    const fac =await FacultyModel.findOne({facultyName: facultyName})
+    return fac.departments;
+};
+const getCoursesInDep = async function(facultyName,departmentName){
+    const deps = await getDepartmentsInFac(facultyName);
+    const department = deps.find(dep => dep.departmentName == departmentName);
+    return department.courses;
+};
+const isInstructorOfCourse = function(course,instructorID){
+    const instructor = course.instructors.find(inst => inst.id === instructorID);
+    if(instructor)
+    {
+        // exist
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+};
+const isTAOfCourse = function(course,TAID){
+    const TA = course.TAs.find(t => t.id == TAID);
     
     if(TA)
     {
@@ -58,7 +58,7 @@ router.get('/viewCoverages', async (req,res)=>{
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const coverages = [];
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,req.user.memberID))
+        if(isInstructorOfCourse(course,req.user.memberId))
         {
             const {courseName,assignedCount} = course;
             const cur = (assignedCount*1.0/course.courseSchedule.length) * 100;
@@ -72,16 +72,16 @@ router.get('/viewCoverages', async (req,res)=>{
 router.get('/viewCoursesAssignments', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    // if(req.member.role != "instructor")
-    // {
-    //     return res.status(401).send("Access denied!");
-    // }
+    if(req.user.MemberRank != "instructor")
+    {
+        return res.status(401).send("Access denied!");
+    }
     const facultyName = req.user.Facultyname;
     const departmentName = req.user.departmentName;
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const schedules = [];
     depCourses.forEach((course)=>{
-        if(isInstructorOfCourse(course,req.user.memberID))
+        if(isInstructorOfCourse(course,req.user.memberId))
         {
             const {courseName,courseSchedule} = course;
             schedules.push({courseName:courseName,schedule:courseSchedule});
@@ -102,7 +102,7 @@ router.get('/viewOneCourseAssignments/:courseName', async (req,res)=>{
     const departmentName = req.user.departmentName;
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const course = depCourses.find(cou => cou.courseName === req.params.courseName);
-    if(!isInstructorOfCourse(course,req.user.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("Not authorized to view this course!");
     }
@@ -135,7 +135,7 @@ router.get('/viewCourseStaff/:courseName', async (req,res)=>{
     const departmentName =req.user.departmentName;
     const depCourses = await getCoursesInDep(facultyName,departmentName);
     const course = depCourses.find(course => course.courseName == req.params.courseName);
-    if(!isInstructorOfCourse(course,req.user.memberID)){
+    if(!isInstructorOfCourse(course,req.user.memberId)){
         return res.status(401).send("Access denied!");
     }
     const staffInfo = {
@@ -159,7 +159,7 @@ router.post('/slotAcadMember', async (req,res)=>{
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.user.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not authorized to modify this course!");
     }
@@ -310,7 +310,7 @@ router.put('/slotAcadMember', async (req,res)=>{
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.user.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
@@ -613,7 +613,7 @@ router.put('/courseCoordinator', async (req,res)=>{
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,req.user.memberID))
+    if(!isInstructorOfCourse(course,req.user.memberId))
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
