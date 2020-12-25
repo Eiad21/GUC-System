@@ -261,21 +261,18 @@ router.route('/viewAttendance')
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
-        let day = dateObj.getUTCDate();
+        let day = dateObj.getUTCDate()+1;
         let year = dateObj.getUTCFullYear();
         let dateoz = new Date(year,month,day);
 
-        const sess =attendanceSchema.filter(function(elem){
-            elem.memberId==req.body.memberId;
-        });
-        if(sess.length==0){
-            console.log('no attendance yet')
+        const sess =await attendanceSchema.find(
+            {memberId:req.body.memberId});
+        if(sess){
 
-            
+            res.send(sess);
         }
-        else{
-            console.log('attendance list ')
-            res.send(sess)
+       else{
+           res.send("no attendance")
 
         }
 
@@ -298,22 +295,24 @@ router.route('/viewAttendance')
 
 /////// same method viewStuffAttendance
 router.post('/viewMyAttendance', async (req,res)=>{
-    
-    Attendance.findOne(
-        {memberId:req.body.memberId}
-    )
-    .then((doc) =>{
-        if(!doc){
-            //not found
-        }
-        res.send(doc)
-        console.log(doc)
-    })
-    .catch((err) => {
-        console.error(err);
-        res.send(err)
-  }
-);
+    //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
+    //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
+    const sessionsMissed = 
+        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0});
+    //console.log(timeArray)
+
+    let sum=0;
+    for (i in sessionsMissed) 
+    {
+        sum=sum+timeArray[i].missingMinutes
+    }
+
+   // console.log(sum)
+    res.send(sessionsMissed)
+    // const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
+
+    // console.log(membersMissingTime);
+    // res.send(membersMissingTime);
 })
 
 
