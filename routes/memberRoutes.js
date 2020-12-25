@@ -277,6 +277,54 @@ router.route('/signOut')
 )
 
 
+
+
+
+
+router.route('/viewAttendancee')
+  
+    .get(async (req, res )=>{
+        let dateObj = new Date();
+
+        let temp =new signInSessionSchema({timein:dateObj 
+        });
+
+        let month = dateObj.getUTCMonth() ; //months from 1-12
+        let day = dateObj.getUTCDate();
+        let year = dateObj.getUTCFullYear();
+        let dateoz = new Date(year,month,day);
+
+        const sess =attendanceSchema.filter(function(elem){
+            elem.memberId==req.body.memberId;
+        });
+        if(sess.length==0){
+            console.log('no attendance yet')
+
+            
+        }
+        else{
+            console.log('attendance list ')
+            res.send(sess)
+
+        }
+
+
+    }
+
+                
+            
+)
+
+
+
+
+
+
+
+
+
+
+
 /////// same method viewStuffAttendance
 router.post('/viewMyAttendance', async (req,res)=>{
     
