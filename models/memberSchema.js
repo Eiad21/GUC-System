@@ -33,6 +33,11 @@ const memberSchema = mongoose.Schema({
         type:String,
 //        required:true,
     },
+    dayoff:
+    {
+        type:String,
+//        required:true,
+    },
 
     email:{
         type:String,

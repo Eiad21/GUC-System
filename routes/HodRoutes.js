@@ -3,7 +3,7 @@ var router = express.Router();
 const memberSchema = require("../models/memberSchema").constructor
 const CourseSchema = require("../models/CourseSchema").constructor
 const DepartmentSchema = require("../models/departmentSchema").constructor
-const requestSchema = require("../models/requestSchema").constructor
+const requestSchema = require("../models/requestSchema").requestModel
 // get all instructors
  router.get("/", async(req,res,next)=>{
 
@@ -251,14 +251,83 @@ router.get("/viewstaffdayoff/:StaffId",async(req,res)=>{
 })
 
 
-router.get("/viewallrequest",async(req,res)=>{
+router.get("/Requests",async(req,res)=>{
     //check if iam a Hod using id from token
-     await DepartmentSchema.findOne({headID:"3"}).then((doc)=>{
-         var allrequestinmydept=requestSchema.find({reciever:doc.depadepartmentName,type:"change_day_off"||"leave"})
+     await DepartmentSchema.findOne({headID:"3"}).then(async(doc)=>{
+         
+         const allrequestinmydept=await requestSchema.find({reciever:doc.departmentName,$or:[{type:"leave"},{type:"changedayoff"}]}).catch((err)=>{res.status(400).send("Bad Request")})
+         console.log(allrequestinmydept)
          res.status(200).send(allrequestinmydept)
      }).catch((err)=>{res.status(400).send("Bad Request")})
 
 })
+
+
+
+ 
+
+
+
+//either accept or rejet a request
+router.post("/Requests",(req,res)=>{
+    //change it to the req.role == head
+    if(1)
+    {
+        //check if the request getting accepted is from the department of this head
+        if(!req.body.id || !req.body.department || !req.body.statusType)
+        {res.status(400).send("BadRequest1")}
+        //change kofta to the department of the Head
+        if(req.body.department = "koftaaa11")
+        { 
+            requestSchema.findOneAndUpdate({_id:req.body.id},{status:req.body.statusType},{new: true}).then(async(doc)=>{
+                // check if the status is already rejected or accepted so i cant accept it again
+                console.log(doc)
+                if(req.body.statusType=="rejected")
+                {
+                    res.status("200").send("Ok")
+                    return;
+                }
+                if(req.body.statusType=="accepted")
+                {
+                        console.log(doc.type)
+                    if(doc.type=='changedayoff')
+                        {    console.log(doc.newDayOff)
+                            if(doc.newDayOff && !(doc.newDayOff==""))
+                            {
+                               await memberSchema.findOneAndUpdate({memberId:doc.sender},{dayoff:doc.newDayOff},{new: true})
+                                //change koftaa with req.hod.depratment
+                                await DepartmentSchema.findOne({headID:"3"}).then((doc1)=>{
+                                        console.log(doc1)
+                                    const indexofmember=doc1.staff.findIndex((value)=>{return value.id==doc.sender})
+
+
+
+                                    doc1.staff[indexofmember].dayoff=doc.newDayOff
+
+                                    doc1.save()
+                                    res.status(200).send("OK")
+                                    })
+                                
+                            }
+                        }
+                    //check if the date of accpetance  and date of the target and the type of this request
+                    else{
+                        res.send("dasdasdasd")
+
+                    }
+                }
+                else
+                {
+                    res.status(400).send("Bad Request2")
+                }
+            })
+        }
+        else {res.status(400).send("Bad Request3")}
+
+    }
+})
+
+
 
 
 
@@ -274,6 +343,4 @@ var allcoursescoverage= [];
       
    }).catch((err)=>{res.status(400).send("Bad Request")})
 })
-
-
  module.exports=router;
