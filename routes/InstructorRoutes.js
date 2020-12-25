@@ -159,7 +159,7 @@ router.post('/slotAcadMember', async (req,res)=>{
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const course = department.courses.find(course => course.courseName == req.body.courseName);
-    if(!isInstructorOfCourse(course,/*req.signedMember.memberID*/"ac_7"))
+    if(!isInstructorOfCourse(course,/*req.signedMember.memberID*/"ac-2"))
     {
         return res.status(401).send("You are not authorized to modify this course!");
     }

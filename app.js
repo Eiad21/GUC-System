@@ -14,12 +14,7 @@ const Authroutes=require('./routes/AuthRoutes')
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
-app.use("/Hod",HODroutes);
-app.use("/hr",HRroutes);
-app.use("/anyAcademic",AnyAcademic);
-app.use("/memberRoutes",memberRoutes);
-app.use("/instructorRoutes",instructorRoutes);
-app.use("/cooRoutes",cooRoutes);
+
 
 
 app.use('',Authroutes);
@@ -33,6 +28,13 @@ app.use(async (req,res, next) =>{
     req.user = jwt.verify(token, process.env.TOKEN_SECRET);
     next();
 })
+
+app.use("/Hod",HODroutes);
+app.use("/hr",HRroutes);
+app.use("/anyAcademic",AnyAcademic);
+app.use("/memberRoutes",memberRoutes);
+app.use("/instructorRoutes",instructorRoutes);
+app.use("/cooRoutes",cooRoutes);
 
 //database tables constructors:
 // const Member=require('./models/memberSchema').constructor;

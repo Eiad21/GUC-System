@@ -15,8 +15,7 @@ require('dotenv').config()
 router.get('/schedule',async(req,res)=>{
     try {
         const user=req.user;
-        
-        if(user.MemberRank!='hr'){
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -31,11 +30,8 @@ router.get('/schedule',async(req,res)=>{
 router.post('/replacementReq',async(req,res)=>{
     try{
         let {date,reason,content,reciever,comment,slotId,slotCourse}=req.body;
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -77,15 +73,16 @@ router.post('/replacementReq',async(req,res)=>{
         if(!theSlot){
             return res.status(400).json({msg:"Slot is not valid"});
         }
+
         var clash = false;
         for(i in user.schedule){
-            if(user.schedule[i].day === theSlot.day && user.schedule[i].time === theSlot.time){
+            if(userReciever.schedule[i].day === theSlot.day && userReciever.schedule[i].time === theSlot.time){
                 clash=true;
             }
         }
 
         if(clash){
-            return res.status(400).json({msg:"The Reciever already has a slot at the time"});
+            return res.status(400).json({msg:"The Reciever already has a slot at this time"});
         }
 
         const request=new Request({
@@ -114,11 +111,9 @@ router.post('/replacementReq',async(req,res)=>{
 
 router.get('/replacementReq',async(req,res)=>{
     try {
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -133,11 +128,9 @@ router.get('/replacementReq',async(req,res)=>{
 router.post('/acceptReplacementReq',async(req,res)=>{
     try {
         let {repId}=req.body;
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
         
@@ -170,11 +163,9 @@ router.post('/acceptReplacementReq',async(req,res)=>{
 router.post('/rejectReplacementReq',async(req,res)=>{
     try {
         let {repId}=req.body;
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -212,11 +203,9 @@ router.post('/slotLinkReq',async(req,res)=>{
             location:slotLoc,
             courseName:slotCourse
         })
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -263,11 +252,9 @@ router.post('/changeDayOffReq',async(req,res)=>{
         const dep=await Department.findOne({departmentName:user.department});
         const reciever=dep.headID
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -314,11 +301,9 @@ router.get('/requests',async(req,res)=>{
         let {filter}=req.body;
 
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -354,11 +339,9 @@ router.post('/cancelReq',async(req,res)=>{
     try{
         let {_id}=req.body;
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -395,11 +378,9 @@ router.post('/submitLeaves',async(req,res)=>{
     try{
         let {date,reason,content,comment,type,theReplacementId}=req.body;
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]!='a' && user.memberId[1]!='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
