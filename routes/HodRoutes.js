@@ -385,7 +385,7 @@ router.get("/viewcoverageofcourses",async(req,res)=>{
    await DepartmentSchema.findOne({headID:req.user.memberId}).then((doc)=>{
 var allcoursescoverage= [];
        doc.courses.forEach(element => {
-           allcoursescoverage.push({CourseName:element.courseName, Coverage:element.coverage})
+           allcoursescoverage.push({CourseName:element.courseName, Coverage:(element.assignedCount/element.courseSchedule.length)*100})
        })
            res.status(200).send(allcoursescoverage)
       
@@ -399,12 +399,12 @@ var allcoursescoverage= [];
 router.get('/viewteachingassignments', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
-    if(req.member.MemberRank != "hod")
+    console.log(req.user.MemberRank)
+    if(req.user.MemberRank != "hod")
     {
         return res.status(401).send("Access denied!");
      }
    // const facultyName ="MET" //req.signedMember.facultyName;
-    const departmentName = "koftaaa11"//req.signedMember.departmentName;
     console.log(req.user.memberId)
     console.log(req.user.departmentName)
     const depCourses = DepartmentSchema.findOne({headID:req.user.memberId, departmentName:req.user.departmentName}).then((doc)=>{
