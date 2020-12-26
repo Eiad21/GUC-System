@@ -61,7 +61,7 @@ const memberSchema = mongoose.Schema({
     officeLocation:{
         type:String
     },
-    MemberRank:
+    MemberRank:// TA,instructor,coordinator,hr
     {
         type:String,
         required:true
