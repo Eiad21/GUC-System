@@ -249,7 +249,7 @@ router.delete('/slotAcadMember', async (req,res)=>{
     }
     course.courseSchedule.forEach(async (slot,idx)=>{
         //to be _id
-        if(slot.slotID == req.body.slotID)
+        if(slot._id == req.body.slotID)
         {
             if(!slot.assignedMemberID)
             {
