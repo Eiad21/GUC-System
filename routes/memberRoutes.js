@@ -76,14 +76,20 @@ router.route('/viewProfile')
  router.route('/updateProfile')
     .post(async (req, res )=>{
  
-        let memberoz= memberSchema.findOne( 
+        let memberoz= await memberSchema.findOne( 
            
             {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
 
+                if(!memberoz){
+                    res.status(400).send("Not found");
+                }
+                if(!req.body.bio){
+                    res.status(400).send("Bad request");
+                }
                 memberoz.bio=req.body.bio;
                 await memberoz.save();
-                res.send('done')
+                res.send(memberoz)
             }
         
     
@@ -92,18 +98,20 @@ router.route('/viewProfile')
    
  
 router.route('/updatePassword')
-  
 
 .put(async (req, res )=>{
     const salt= await  bcrypt.genSalt(10)
   //  const correctpassword= await bcrypt.compare(req.body.password, user.password)
 
-        if(! req.body.password){
-            res.send('You must sign up with password')
+        if(!req.body.passwordOld){
+            return res.status(400).send('You must enter your old password');
         }
-        let temp= await  bcrypt.hash(req.body.password, salt) 
+        if(!req.body.passwordNew){
+            return res.status(400).send('You must enter your new password');
+        }
+        let passwordNewHash= await  bcrypt.hash(req.body.passwordNew, salt) 
 
-         let memberoz= memberSchema.findOne( 
+         let memberoz= await memberSchema.findOne( 
             //  {memberId: request.body.memberId}, function(err, mem) {
            
             //     if(!err)
@@ -113,13 +121,13 @@ router.route('/updatePassword')
             {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
 
-                if(await bcrypt.compare(req.body.oldPassword, memberoz.password)){
-                    memberoz.password=temp;
+                if(await bcrypt.compare(req.body.passwordOld, memberoz.password)){
+                    memberoz.password=passwordNewHash;
                      await memberoz.save();
-                     res.send('done password chaneged')
+                     return res.send('Password chaneged')
                 }
 
-                else{res.send('enter correct password ')}
+                else{return res.status(400).send('enter correct password ')}
             }
         
     
@@ -178,12 +186,6 @@ router.route('/signOut')
   
 
     .post(async (req, res )=>{
-        
-           
-        
-
-
-
 
 
         let dateObj = new Date();
@@ -238,17 +240,7 @@ router.route('/signOut')
                     await sess.save();
                     res.send('time out slot added ') 
                  }
-
         }
-
-
-
-
-
-
-
-
-
         
     }
                         
@@ -260,7 +252,7 @@ router.route('/signOut')
 
 
 
-router.route('/viewAttendancee')
+router.route('/viewAttendance')
   
     .get(async (req, res )=>{
         let dateObj = new Date();
@@ -269,21 +261,18 @@ router.route('/viewAttendancee')
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
-        let day = dateObj.getUTCDate();
+        let day = dateObj.getUTCDate()+1;
         let year = dateObj.getUTCFullYear();
         let dateoz = new Date(year,month,day);
 
-        const sess =attendanceSchema.filter(function(elem){
-            elem.memberId==req.body.memberId;
-        });
-        if(sess.length==0){
-            console.log('no attendance yet')
+        const sess =await attendanceSchema.find(
+            {memberId:req.body.memberId});
+        if(sess){
 
-            
+            res.send(sess);
         }
-        else{
-            console.log('attendance list ')
-            res.send(sess)
+       else{
+           res.send("no attendance")
 
         }
 
@@ -306,34 +295,43 @@ router.route('/viewAttendancee')
 
 /////// same method viewStuffAttendance
 router.post('/viewMyAttendance', async (req,res)=>{
-    
-    Attendance.findOne(
-        {memberId:req.body.memberId}
-    )
-    .then((doc) =>{
-        if(!doc){
-            //not found
-        }
-        res.send(doc)
-        console.log(doc)
-    })
-    .catch((err) => {
-        console.error(err);
-        res.send(err)
-  }
-);
+    //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
+    //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
+    const sessionsMissed = 
+        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0,missedDay:1});
+    //console.log(timeArray)
+
+  
+
+   // console.log(sum)
+    res.send(sessionsMissed)
+    // const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
+
+    // console.log(membersMissingTime);
+    // res.send(membersMissingTime);
 })
+
+
 //////////////////////////viewMembersMissingHoursAndExtraHours
 router.post('/viewMembersMissingHoursAndExtraHours', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
-    const membersIDsMissingTime = 
-        await Attendance.find( {$or: [{missedDay: true}, {missingMinutes: {$gt: 0}}]} ,{memberId:1, _id:0}).distinct('memberId');
-    
-    const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
+    const timeArray = 
+        await attendanceSchema.find( {memberId:req.user.memberId} ,{missingMinutes:1, _id:0});
+    //console.log(timeArray)
 
-    console.log(membersMissingTime);
-    res.send(membersMissingTime);
+    let sum=0;
+    for (i in timeArray) 
+    {
+        sum=sum+timeArray[i].missingMinutes
+    }
+
+   // console.log(sum)
+    res.send(sum/60)
+    // const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
+
+    // console.log(membersMissingTime);
+    // res.send(membersMissingTime);
 })
 
 module.exports=router

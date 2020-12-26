@@ -1,5 +1,6 @@
 const express = require("express")
 var router = express.Router();
+const bcrypt = require("bcrypt")
 const Location = require("../models/locationSchema").constructor
 const Faculty = require("../models/facultySchema").constructor
 const Slot = require("../models/slotSchema").constructor
@@ -7,20 +8,24 @@ const Member = require("../models/memberSchema").constructor
 const Request = require("../models/requestSchema").requestModel
 const Course = require("../models/CourseSchema").constructor
 const Department = require("../models/departmentSchema").constructor
-
-
-app.use(express.json());
-app.use(express.urlencoded({extended:false}));
+require('dotenv').config()
 
 // Any Academic Routes
 
-app.get('/schedule',async(req,res)=>{
+const getDepartmentsInFac =async function(facultyName){
+    const fac =await Faculty.findOne({facultyName: facultyName})
+    return fac.departments;
+};
+const getCoursesInDep = async function(facultyName,departmentName){
+    const deps = await getDepartmentsInFac(facultyName);
+    const department = deps.find(dep => dep.departmentName == departmentName);
+    return department.courses;
+};
+
+router.get('/schedule',async(req,res)=>{
     try {
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-        
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -32,17 +37,21 @@ app.get('/schedule',async(req,res)=>{
 })
 
 
-app.post('/replacementReq',async(req,res)=>{
+router.post('/replacementReq',async(req,res)=>{
     try{
-        let {date,reason,content,reciever,comment,slotId,slotCourse}=req.body;
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        let {dateYear,dateMonth,dateDay,reason,content,reciever,comment,slotId,slotCourse}=req.body;
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
-
+        if(!dateYear || !dateMonth || !dateDay){
+            return res.status(400).json({msg:"Date is required"});
+        }
+        const date=new Date(
+            dateYear,
+            dateMonth,
+            dateDay
+        )
         if(!slotId){
             return res.status(400).json({msg:"Slot Id is required"});
         }
@@ -50,9 +59,7 @@ app.post('/replacementReq',async(req,res)=>{
             return res.status(400).json({msg:"Slot Course is required"});
         }
 
-        if(!date){
-            return res.status(400).json({msg:"Date is required"});
-        }
+        
         if(!reciever){
             return res.status(400).json({msg:"Reciever is required"});
         }
@@ -69,6 +76,10 @@ app.post('/replacementReq',async(req,res)=>{
         
         const userReciever=await Member.findOne({memberId:reciever});
 
+        if(!userReciever){
+            return res.status(400).json({msg:"Reciever is not valid"});
+        }
+
         //query to get the course
         const course=await Course.findOne({courseName:slotCourse});
 
@@ -76,20 +87,26 @@ app.post('/replacementReq',async(req,res)=>{
             return res.status(400).json({msg:"Slot Course is not valid"});
         }
 
-        const theSlot=course.courseSchedule.find({slotID:slotId});
+        console.log(user)
+        console.log(user.schedule)
+        const theSlot=user.schedule.find((slot)=>{
+            return slot._id==slotId;
+        });
         
         if(!theSlot){
             return res.status(400).json({msg:"Slot is not valid"});
         }
+
         var clash = false;
-        for(i in user.schedule){
-            if(user.schedule[i].day === theSlot.day && user.schedule[i].time === theSlot.time){
+        for(i in userReciever.schedule){
+            if(userReciever.schedule[i].day === theSlot.day && userReciever.schedule[i].time === theSlot.time){
                 clash=true;
             }
         }
+        
 
         if(clash){
-            return res.status(400).json({msg:"The Reciever already has a slot at the time"});
+            return res.status(400).json({msg:"The Reciever already has a slot at this time"});
         }
 
         const request=new Request({
@@ -116,17 +133,14 @@ app.post('/replacementReq',async(req,res)=>{
 })
 
 
-app.get('/replacementReq',async(req,res)=>{
+router.get('/replacementReq',async(req,res)=>{
     try {
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
-        const all = await Request.find({type:"replacement"},{$or:[{sender: user.memberId},{reciever: user.memberId}]})
+        const all = await Request.find({type:"replacement",$or:[{sender: user.memberId},{reciever: user.memberId}]})
         res.json(all);
         
     } catch (error) {
@@ -134,14 +148,11 @@ app.get('/replacementReq',async(req,res)=>{
     }
 })
 
-app.post('/acceptReplacementReq',async(req,res)=>{
+router.post('/acceptReplacementReq',async(req,res)=>{
     try {
         let {repId}=req.body;
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-        
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
         
@@ -153,9 +164,9 @@ app.post('/acceptReplacementReq',async(req,res)=>{
         Request.findOneAndUpdate(
             {_id: repId},
             {
-                status:accepted
+                status:"accepted"
             },
-            { new: true },)
+            { new: true })
             
             .then((doc) => {
                 res.send(doc)
@@ -171,14 +182,11 @@ app.post('/acceptReplacementReq',async(req,res)=>{
     }
 })
 
-app.post('/rejectReplacementReq',async(req,res)=>{
+router.post('/rejectReplacementReq',async(req,res)=>{
     try {
         let {repId}=req.body;
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-        
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -190,7 +198,7 @@ app.post('/rejectReplacementReq',async(req,res)=>{
         Request.findOneAndUpdate(
             {_id: repId},
             {
-                status:accepted
+                status:"rejected"
             },
             { new: true },)
             
@@ -207,26 +215,18 @@ app.post('/rejectReplacementReq',async(req,res)=>{
     }
 })
 
-app.post('/slotLinkReq',async(req,res)=>{
+router.post('/slotLinkReq',async(req,res)=>{
     try{
-        let {reason,content,comment,slotDay,slotTime,slotLoc,slotCourse}=req.body;
-        const slot=new Slot({
-            day:slotDay,
-            time:slotTime,
-            location:slotLoc,
-            courseName:slotCourse
-        })
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        let {reason,content,comment,slotId,slotCourse}=req.body;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
-
         //query to get the course coordinator
-        const course=await Course.findOne({courseName:slotCourse});
-        const reciever=course.coordiantorID
+        const courses=await getCoursesInDep(user.Facultyname,user.departmentName)
+        const course=courses.find((cur)=>cur.courseName==slotCourse);
+        const reciever=course.coordinatorID
 
         if(!reason){
             reason="";
@@ -247,7 +247,7 @@ app.post('/slotLinkReq',async(req,res)=>{
             type:"slot_linking",
             status:"pending",
             comment:comment,
-            slot:slot
+            slotId:slotId
         })
         request.save().then((data)=>{
             res.json(data);
@@ -259,19 +259,17 @@ app.post('/slotLinkReq',async(req,res)=>{
         res.status(500).json({error:error.message})
     }
 })
-app.post('/changeDayOffReq',async(req,res)=>{
+router.post('/changeDayOffReq',async(req,res)=>{
     try{
         let {reason,content,comment,newDayOff}=req.body;
+        const user=req.user;
 
         //query to get the HOD
-        const dep=await Department.findOne({departmentName:user.department});
+        const deps = await getDepartmentsInFac(user.Facultyname);
+        const dep = deps.find(dep => dep.departmentName == user.departmentName);
         const reciever=dep.headID
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-        
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -312,17 +310,15 @@ app.post('/changeDayOffReq',async(req,res)=>{
     }
 })
 
-app.get('/requests',async(req,res)=>{
+router.get('/requests',async(req,res)=>{
     try {
         
         let {filter}=req.body;
 
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
-
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        const user=req.user;
+        
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
@@ -332,15 +328,15 @@ app.get('/requests',async(req,res)=>{
         }
         else{
             if(filter=="accepted"){
-                const all = await Request.find({status:'accepted'},{$or:[{sender: user.memberId},{reciever: user.memberId}]})
+                const all = await Request.find({status:'accepted',$or:[{sender: user.memberId},{reciever: user.memberId}]})
                 res.json(all);
             }
             else{
                 if(filter=="rejected"){
-                    const all = await Request.find({status:'rejected'},{$or:[{sender: user.memberId},{reciever: user.memberId}]})
+                    const all = await Request.find({status:'rejected',$or:[{sender: user.memberId},{reciever: user.memberId}]})
                     res.json(all);
                 }else{
-                    const all = await Request.find({status:'pending'},{$or:[{sender: user.memberId},{reciever: user.memberId}]})
+                    const all = await Request.find({status:'pending',$or:[{sender: user.memberId},{reciever: user.memberId}]})
                     res.json(all);
                     
                 }
@@ -354,27 +350,29 @@ app.get('/requests',async(req,res)=>{
     }
 })
 
-app.post('/cancelReq',async(req,res)=>{
+router.post('/cancelReq',async(req,res)=>{
     try{
         let {_id}=req.body;
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
         const request=await Request.findOne({_id:_id});
         
+        if(request.sender!=user.memberId){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
         if(request.status=='pending'){
-            Request.findOneAndRemove({_id:_id});
+            await Request.findOneAndRemove({_id:_id});
             res.json(request);
             return;
         }
         if(!request.date){
-            Request.findOneAndRemove({_id:_id});
+            await Request.findOneAndRemove({_id:_id});
             res.json(request);
             return;
         }
@@ -382,7 +380,7 @@ app.post('/cancelReq',async(req,res)=>{
         var todaysDate = new Date();
         var reqDate = new Date(request.date)
         if(reqDate>todaysDate) {
-            Request.findOneAndRemove({_id:_id});
+            await Request.findOneAndRemove({_id:_id});
             res.json(request);
             return;
         }
@@ -395,20 +393,26 @@ app.post('/cancelReq',async(req,res)=>{
     }
 })
 
-app.post('/submitLeaves',async(req,res)=>{
+router.post('/submitLeaves',async(req,res)=>{
     try{
-        let {date,reason,content,comment,type,theReplacementId}=req.body;
+        let {dateYear,dateMonth,dateDay,reason,content,comment,type}=req.body;
 
-        const loggedinID="5fde5008edfe910c8c3dc6d2";
-        const user=await Member.findOne({_id:loggedinID});
+        const user=req.user;
         
-        const verified=true;
-        if(!verified || user.MemberRank=='hr'){
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
-
+        if(!dateYear || !dateMonth || !dateDay){
+            return res.status(400).json({msg:"Date is required"});
+        }
+        const date=new Date(
+            dateYear,
+            dateMonth,
+            dateDay
+        )
         //query to get the HOD
-        const dep=await Department.findOne({departmentName:user.department});
+        const deps = await getDepartmentsInFac(user.Facultyname);
+        const dep = deps.find(dep => dep.departmentName == user.departmentName);
         const reciever=dep.headID
 
 
@@ -417,14 +421,14 @@ app.post('/submitLeaves',async(req,res)=>{
         }
 
         if(type=='annual_leave'){
-            if(!date){
+            if(!dateYear || !dateMonth || !dateDay){
                 return res.status(400).json({msg:"Date is required"});
             }
             if(new Date(date)<=new Date()) {
                 return res.status(400).json({msg:"Annual leaves should be submitted before the targeted day"});
             }
 
-            const replacements=await Request.find({date:date,sender:user.memberId,status:accepted});
+            const replacements=await Request.find({date:date,sender:user.memberId,status:"accepted"});
 
             const request=new Request({
                 date:date,
@@ -553,6 +557,9 @@ app.post('/submitLeaves',async(req,res)=>{
 
             return;
         }
+
+        
+        return res.status(400).json({msg:"Type not valid"});
         
         
     }

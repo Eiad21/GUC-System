@@ -14,11 +14,9 @@ require('dotenv').config()
 // HR Routes
 // Location manipulation
 router.post('/addLocation', async (req,res)=>{
-    console.log(process.env.TOKEN_SECRET);
-    return res.status(200).send();
-    // if(!req.signedMember || req.signedMember.MemberRank != "hr"){
-    //     return res.status(401).send("Access denied!");
-    // }
+    if(req.user.MemberRank != "hr"){
+         return res.status(401).send("Access denied!");
+    }
     var location;
     if(req.body.locationType === "Office"){
         location = await new Location({
@@ -46,9 +44,9 @@ router.post('/addLocation', async (req,res)=>{
 })
 
 router.post('/updateLocation', async (req,res)=>{
-    if(!req.signedMember || req.signedMember.MemberRank != "hr"){
+    if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
-    }
+   }
     Location.findOneAndUpdate(
         {locationName: req.body.locationNameOld})
         
@@ -77,9 +75,9 @@ router.post('/updateLocation', async (req,res)=>{
 });
 
 router.post('/deleteLocation', async (req,res)=>{
-    // if(!req.signedMember || req.signedMember.MemberRank != "hr"){
-    //     return res.status(401).send("Access denied!");
-    // }
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     Location.findOneAndDelete(
         {locationName: req.body.locationName})
              
@@ -99,7 +97,7 @@ router.post('/deleteLocation', async (req,res)=>{
 
 // Faculty manipulation
 router.post('/addFaculty', async (req,res)=>{
-    if(!req.signedMember || req.signedMember.MemberRank != "hr"){
+    if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
     }
     const faculty= await new Faculty({
@@ -116,7 +114,9 @@ router.post('/addFaculty', async (req,res)=>{
 })
 
 router.post('/updateFaculty', async (req,res)=>{
-  
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find and update Faculty on facultyName
     Faculty.findOneAndUpdate(
         {facultyName: req.body.facultyNameOld},
@@ -139,7 +139,9 @@ router.post('/updateFaculty', async (req,res)=>{
 });
 
 router.post('/deleteFaculty', async (req,res)=>{
-  
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find and delete Faculty on facultyName
     Faculty.findOneAndDelete(
         {facultyName: req.body.facultyName})
@@ -157,7 +159,9 @@ router.post('/deleteFaculty', async (req,res)=>{
 
 // Department within Faculty manipulation
 router.post('/addDepartment', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find the Faculty
     Faculty.findOne(
         {facultyName: req.body.facultyName})
@@ -199,7 +203,9 @@ router.post('/addDepartment', async (req,res)=>{
 })
 
 router.post('/updateDepartment', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find the Faculty
     Faculty.findOne(
         {facultyName: req.body.facultyName})
@@ -246,7 +252,9 @@ router.post('/updateDepartment', async (req,res)=>{
 })
 
 router.post('/deleteDepartment', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find the Faculty
     Faculty.findOne(
         {facultyName: req.body.facultyName})
@@ -279,7 +287,9 @@ router.post('/deleteDepartment', async (req,res)=>{
 
 // Course within Department within Faculty manipulation
 router.post('/addCourse', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find the Faculty
     Faculty.findOne(
         {facultyName: req.body.facultyName})
@@ -320,7 +330,9 @@ router.post('/addCourse', async (req,res)=>{
 })
 
 router.post('/updateCourse', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find the Faculty
     Faculty.findOne(
         {facultyName: req.body.facultyName})
@@ -369,7 +381,9 @@ router.post('/updateCourse', async (req,res)=>{
 })
 
 router.post('/deleteCourse', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     // Find the Faculty
     Faculty.findOne(
         {facultyName: req.body.facultyName})
@@ -418,17 +432,20 @@ router.post('/deleteCourse', async (req,res)=>{
 
 // Member manipulation
 router.post('/addMember', async (req,res)=>{
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     if(!req.body.MemberRank){
-        return res.status(401).send("Member rank must be specified");
+        return res.status(400).send("Member rank must be specified");
     }
     if(!req.body.email){
-        return res.status(401).send("Member email must be specified");
+        return res.status(400).send("Member email must be specified");
     }
     if(!req.body.name){
-        return res.status(401).send("Member name must be specified");
+        return res.status(400).send("Member name must be specified");
     }
     if(!req.body.gender){
-        return res.status(401).send("Member gender must be specified");
+        return res.status(400).send("Member gender must be specified");
     }
     const user = await Member.findOne({email:req.body.email});
     if(user){
@@ -465,7 +482,7 @@ router.post('/addMember', async (req,res)=>{
          memberId:prefix,
          email:req.body.email,
          password:hashedPass,
-         MemberRank:prefix
+         MemberRank:req.body.MemberRank
      });
 
     member.save().then((data)=>{
@@ -478,8 +495,11 @@ router.post('/addMember', async (req,res)=>{
 })
 
 router.post('/updateMemberDepartment', async (req,res)=>{
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     if(!req.body.memberId || !req.body.facultyName || req.body.departmentName){
-        // bad request
+        return res.status(400).send("You need to specify ID, facult name, and department name");
     }
 
         // Add to new Fac and Dep
@@ -578,8 +598,11 @@ router.post('/updateMemberDepartment', async (req,res)=>{
 })
 
 router.post('/deleteMemberDepartment', async (req,res)=>{
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     if(!req.body.memberId){
-        //bad req
+        return res.status(400).send("Missing member ID");
     }
     // Find the member
     Member.findOneAndDelete(
@@ -648,9 +671,9 @@ router.post('/deleteMemberDepartment', async (req,res)=>{
 })
 
 router.post('/addNewSignRecord', async (req,res)=>{
-    // if(!req.signedMember || req.signedMember.MemberRank != "hr"){
-    //     return res.status(401).send("Access denied!");
-    // }
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     if(req.body.date){
         Attendance.findOne({date:req.body.date, memberId:req.body.memberId})
         .then((doc) =>{
@@ -684,18 +707,20 @@ router.post('/addNewSignRecord', async (req,res)=>{
         
     }
     else{
-        res.status(400).send("Bad request");
+        return res.status(400).send("Bad request");
     }
 })
 
 router.post('/viewStaffAttendance', async (req,res)=>{
-    
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     Attendance.findOne(
         {memberId:req.body.memberId}
     )
     .then((doc) =>{
         if(!doc){
-            //not found
+            return res.status(400).send("Not found!");
         }
         res.send(doc)
         console.log(doc)
@@ -707,9 +732,12 @@ router.post('/viewStaffAttendance', async (req,res)=>{
 );
 })
 
-router.post('/viewMembersMissingTime', async (req,res)=>{
+router.get('/viewMembersMissingTime', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
     const membersIDsMissingTime = 
         await Attendance.find( {$or: [{missedDay: true}, {missingMinutes: {$gt: 0}}]} ,{memberId:1, _id:0}).distinct('memberId');
     
@@ -720,14 +748,22 @@ router.post('/viewMembersMissingTime', async (req,res)=>{
 })
 
 router.post('/updateMemberSalary', async (req,res)=>{
-
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    if(!req.body.memberId){
+        return res.status(400).send("Bad request");
+    }
+    if(!req.body.salary){
+        return res.status(400).send("Bad request");
+    }
+    if(req.body.memberId === req.user.memberId){
+        return res.status(401).send("Access denied!");
+    }
     Member.findOne(
         {memberId:req.body.memberId})
     .then((doc) =>{
         if(doc){
-            if(!req.body.salary){
-                //bad request
-            }
             doc.salary = req.body.salary;
             doc.save()
             .then((doc) =>{
@@ -738,6 +774,9 @@ router.post('/updateMemberSalary', async (req,res)=>{
                 console.error(err);
                 res.send(err)
             });
+        }
+        else{
+            res.status(404).send("Not found");
         }
     })
     .catch((err) => {
