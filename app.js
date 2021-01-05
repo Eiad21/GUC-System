@@ -16,7 +16,12 @@ app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 
 
-
+app.use (function (req,res, next){
+res.header("Access-Control-Allow-Headers" ,"Origin, X-Requested-With, Content-Type, Accept")
+  res.header('Access-Control-Allow-Origin',"*");
+  res.header('Access-Control-Allow-Headers',"Origin, X-Requested-With , content-type, Accept")
+  nect();
+});
 app.use('',Authroutes);
 
 app.use(async (req,res, next) =>{
@@ -46,7 +51,7 @@ app.use("/cooRoutes",cooRoutes);
 // const LogObject=require('./models/logObjectSchema').constructor;
 // const Slot=require('./models/slotSchema').constructor;
 
- 
+
 
 // const connectionParams={
 //     useNewUrlParser:true,
@@ -63,20 +68,20 @@ app.use("/cooRoutes",cooRoutes);
 //     console.log("Database connected");
 // }).catch(()=>{
 //     console.log("error in database connection");
-// }); 
+// });
  //app.use("/",routes)
- 
+
 
 
 //  const memberSchema = new Member({
 //     name:"Kimo"
-    
-       
+
+
 //     ,
 
 //     memberId: 6
 //     ,
-    
+
 //     Facultyname:"Pharmacy"
 //     ,
 
@@ -92,7 +97,7 @@ app.use("/cooRoutes",cooRoutes);
 
 // memberSchema.save();
 
- 
+
 
 // app.post('/schedule',(req,res)=>{
 //     const location=new Location({
@@ -114,7 +119,7 @@ app.use("/cooRoutes",cooRoutes);
 // })
 
 // app.get('/schedule',(req,res)=>{
-    
+
 // })
 app.listen(8080)
 module.exports.app = app

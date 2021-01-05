@@ -28,7 +28,7 @@ mongoose.connect(url,connectionParams).then(()=>{
     console.log("Database connected");
 }).catch(()=>{
     console.log("error in database connection");
-}); 
+});
 /*
 
     let slot1=new slotSchema({
@@ -49,7 +49,7 @@ mongoose.connect(url,connectionParams).then(()=>{
             salary:1000,
             officeLocation:"c4",
             schedule:[slot1]
-        } 
+        }
         );
         let member2=new memberSchema(
             {
@@ -67,7 +67,7 @@ mongoose.connect(url,connectionParams).then(()=>{
                     location="c4",
                     courseName="csen"
                 })]
-            } 
+            }
             )
 
             let member3=new memberSchema(
@@ -86,7 +86,7 @@ mongoose.connect(url,connectionParams).then(()=>{
                         location="c4",
                         courseName="csen"
                     })]
-                } 
+                }
                 )
 */
 
@@ -129,7 +129,7 @@ mongoose.connect(url,connectionParams).then(()=>{
 //    salary:1,
 //     officeLocation:"c5",
 //    schedule:[]
-//    } 
+//    }
 //     )
 
 
@@ -144,13 +144,13 @@ mongoose.connect(url,connectionParams).then(()=>{
 //    salary:1,
 //     officeLocation:"c5",
 //    schedule:[]
-//    } 
+//    }
 //     )
 
 // let course1=new courseschema
 // ( {courseName:"Csen502",
 //   coverage:75,
-  
+
 
 //   coordiantorID:4,
 //   coordinatorName:"Kimo",
@@ -172,5 +172,3 @@ mongoose.connect(url,connectionParams).then(()=>{
 //    });
 //   department1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
 //  slot1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)})
-
-
