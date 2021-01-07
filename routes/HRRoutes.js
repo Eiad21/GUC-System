@@ -303,7 +303,7 @@ router.post('/addCourse', async (req,res)=>{
                     // Add the course
                     const course= await new Course({
                         courseName:req.body.courseName,
-                        coverage:req.body.coverage,
+                        coverage:0,
                         coordinatorID:req.body.coordinatorID,
                         // get auto
                         coordinatorName:req.body.coordinatorName

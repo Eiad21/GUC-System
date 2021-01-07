@@ -30,6 +30,7 @@ app.use('',Authroutes);
 app.use(async (req,res, next) =>{
     const token = req.headers.token;
     console.log(req.body)
+    console.log(req.params)
     if(!token){
         return res.status(401).send("ya kalb");
     }
@@ -38,8 +39,9 @@ app.use(async (req,res, next) =>{
     next();
 })
 
-app.use("/Hod",HODroutes);
 app.use("/hr",HRroutes);
+app.use("/Hod",HODroutes);
+
 app.use("/anyAcademic",AnyAcademic);
 app.use("/memberRoutes",memberRoutes);
 app.use("/instructorRoutes",instructorRoutes);
