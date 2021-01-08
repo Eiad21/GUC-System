@@ -432,23 +432,37 @@ router.post('/deleteCourse', async (req,res)=>{
 
 // Member manipulation
 router.post('/addMember', async (req,res)=>{
+    console.log("0")
+
+
     if(req.user.MemberRank != "hr"){
+        console.log("1")
         return res.status(401).send("Access denied!");
     }
     if(!req.body.MemberRank){
+        console.log("2")
+
         return res.status(400).send("Member rank must be specified");
     }
     if(!req.body.email){
+        console.log("3")
+
         return res.status(400).send("Member email must be specified");
     }
     if(!req.body.name){
+        console.log("4")
+
         return res.status(400).send("Member name must be specified");
     }
     if(!req.body.gender){
+        console.log("5")
+
         return res.status(400).send("Member gender must be specified");
     }
     const user = await Member.findOne({email:req.body.email});
     if(user){
+        console.log("6")
+
         return res.status(401).send("Member already exists");
     }
 

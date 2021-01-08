@@ -17,6 +17,8 @@ app.use(express.urlencoded({extended:false}));
 
 
 app.use (function (req,res, next){
+  console.log(req.body)
+  console.log("sba7 el d7k")
   res.header('Access-Control-Allow-Origin',"*");
   //res.header('Access-Control-Allow-Credentials',"true");
   res.header('Access-Control-Allow-Headers',"Origin, X-Requested-With , content-type, Accept");
@@ -27,10 +29,12 @@ app.use('',Authroutes);
 
 app.use(async (req,res, next) =>{
     const token = req.headers.token;
+    console.log(req.body)
     if(!token){
         return res.status(401).send("ya kalb");
     }
     req.user = jwt.verify(token, process.env.TOKEN_SECRET);
+    console.log(req.user)
     next();
 })
 
