@@ -29,14 +29,18 @@ router.get('/viewSlotLinkingReqs', async (req,res)=>{
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
 
-    allRequests={};
+    allRequests=[];
     coursesCoordinated.forEach(async(course)=>{
-            
+
             const {courseName} = course;
             const reqs = await RequestModel.findMany({reciever: courseName, type:"slot_linking"});
-            allRequests[courseName] = reqs;
+          //  allRequests.push({requests:reqs}) ;
+          reqs.forEach(req =>{
+            allRequests.push(req)
+          })
     });
     res.send(allRequests);
+
 })
 
 // input: request ID || or all request paramters ????
@@ -65,7 +69,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
     }
     slotLinkingReq.status = "accepted";
     await slotLinkingReq.save();
-    
+
     // // check the following or assume handled
     // if(TA.departmentName != departmentName)
     // {
@@ -151,7 +155,7 @@ router.post('/rejecttSlotLinking', async (req,res)=>{
     }
     slotLinkingReq.status = "rejrcted";
     await slotLinkingReq.save();
-    
+
 })
 
 
@@ -169,14 +173,14 @@ router.post('/courseSlot', async (req,res)=>{
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
     const coursesCoordinated = getCoursesCoordinated(department.courses, req.user.memberId);
-    
+
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
-    
+
     if(!course)
     {
         return res.status(401).send("Access Denied");
     }
-    
+
     const courseSlot = new CourseSlotModel(req.body.courseSlot);
     // check if there are collisions in the member's schedule
     const collisionSlot = course.courseSchedule.find(slot => slot.day == courseSlot.day && slot.time == courseSlot.time && slot.location == courseSlot.location);
@@ -222,7 +226,7 @@ router.delete('/courseSlot', async (req,res)=>{
     {
         res.status(401).send("Access Denied");
     }
-    // // may skip the following    
+    // // may skip the following
     // const courseSlot = course.courseSchedule.find(slot => slot.slotID == req.body.slotID); // or use all slot Indo to escape from the ID issue that I think may face
     // if(!courseSlot)
     // {
@@ -231,7 +235,7 @@ router.delete('/courseSlot', async (req,res)=>{
     const deletedSlot= course.courseSchedule.find(slot => slot.slotID == req.body.slotID);
     if(!deletedSlot){
         res.status(406).send("Access denied");
- 
+
     }
 
     if(deletedSlot.assignedMemberID)
