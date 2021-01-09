@@ -22,15 +22,17 @@ app.use (function (req,res, next){
   res.header('Access-Control-Allow-Origin',"*");
   //res.header('Access-Control-Allow-Credentials',"true");
   res.header('Access-Control-Allow-Headers',"Origin, X-Requested-With , content-type, Accept");
-   //res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  //res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   next();
 });
+
+
 app.use('',Authroutes);
 
 app.use(async (req,res, next) =>{
-    const token = req.headers.token;
-    console.log(req.body)
-    console.log(req.params)
+    const token = req.query.token;
+    console.log("token")
+    console.log(token)
     if(!token){
         return res.status(401).send("ya kalb");
     }

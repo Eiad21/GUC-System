@@ -10,9 +10,26 @@ const Attendance = require("../models/attendanceSchema").constructor
 const Counter = require("../models/counterSchema").constructor
 const Session = require("../models/signInSessionSchema").constructor
 require('dotenv').config()
+const jwt=require('jsonwebtoken');
+
 
 // HR Routes
 // Location manipulation
+
+function authenticate(req){
+    const token = req.body.token;
+    console.log("token")
+    console.log(token)
+    console.log(req.body)
+    console.log(req.params)
+    if(!token){
+        return false;
+    }
+    else{
+        return jwt.verify(token, process.env.TOKEN_SECRET);
+    }
+}
+
 router.post('/addLocation', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
          return res.status(401).send("Access denied!");
@@ -432,11 +449,9 @@ router.post('/deleteCourse', async (req,res)=>{
 
 // Member manipulation
 router.post('/addMember', async (req,res)=>{
-    console.log("0")
-
-
+    console.log(0);
+    console.log(req.user)
     if(req.user.MemberRank != "hr"){
-        console.log("1")
         return res.status(401).send("Access denied!");
     }
     if(!req.body.MemberRank){
@@ -446,7 +461,6 @@ router.post('/addMember', async (req,res)=>{
     }
     if(!req.body.email){
         console.log("3")
-
         return res.status(400).send("Member email must be specified");
     }
     if(!req.body.name){
