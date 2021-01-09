@@ -448,6 +448,15 @@ router.post('/deleteCourse', async (req,res)=>{
 })
 
 // Member manipulation
+router.post('/viewAllMembers', async (req, res)=>{
+    console.log(req.user)
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    const users = await Member.find({ email: { $ne: req.user.email } });
+    res.send(users);
+    console.log(users);
+})
 router.post('/addMember', async (req,res)=>{
     console.log(0);
     console.log(req.user)
