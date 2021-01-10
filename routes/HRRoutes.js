@@ -113,6 +113,15 @@ router.post('/deleteLocation', async (req,res)=>{
 });
 
 // Faculty manipulation
+router.post('/viewAllFaculties', async (req, res)=>{
+    console.log(req.user)
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    const facs = await Faculty.find();
+    res.send(facs);
+    console.log(facs);
+})
 router.post('/addFaculty', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
@@ -120,6 +129,7 @@ router.post('/addFaculty', async (req,res)=>{
     const faculty= await new Faculty({
         facultyName:req.body.facultyName,
         deanID:req.body.deanID,
+        deanName:req.body.deanName
     });
     faculty.save().then((data)=>{
         res.send(data);
@@ -135,16 +145,27 @@ router.post('/updateFaculty', async (req,res)=>{
         return res.status(401).send("Access denied!");
     }
     // Find and update Faculty on facultyName
-    Faculty.findOneAndUpdate(
-        {facultyName: req.body.facultyNameOld},
-        {
-            // For values you don't wish to change enter the old value
-            facultyName:req.body.facultyNameNew,
-            deanID:req.body.deanID
-        },
-        { new: true },)
+    Faculty.findOne(
+        {facultyName: req.body.facultyNameOld}
+        // {
+        //     // For values you don't wish to change enter the old value
+        //     facultyName:req.body.facultyNameNew,
+        //     deanID:req.body.deanID
+        // },
+        // { new: true },
+        )
         
         .then((doc) => {
+            if(req.body.facultyNameNew){
+                doc.facultyName = req.body.facultyNameNew
+            }
+            if(req.body.deanID){
+                doc.facultyName = req.body.facultyNameNew
+            }
+            if(req.body.facultyNameNew){
+                doc.facultyName = req.body.facultyNameNew
+            }
+            doc.save();
             console.log(doc);
             res.send(doc)
           })
@@ -175,6 +196,21 @@ router.post('/deleteFaculty', async (req,res)=>{
 });
 
 // Department within Faculty manipulation
+router.post('/viewAllDepartments', async (req, res)=>{
+    console.log(req.user)
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    const facs = await Faculty.find();
+    let arr = []
+    for(i in facs){
+        let deps = facs[i].departments;
+        arr = arr.concat(deps);
+    }
+    res.send(arr);
+    console.log(arr);
+})
+
 router.post('/addDepartment', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
