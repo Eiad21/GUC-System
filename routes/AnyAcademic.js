@@ -30,7 +30,7 @@ router.get('/schedule',async(req,res)=>{
         }
 
         res.json(user.schedule);
-        
+
     } catch (error) {
         res.status(500).json({error:error.message})
     }
@@ -39,7 +39,7 @@ router.get('/schedule',async(req,res)=>{
 
 router.post('/replacementReq',async(req,res)=>{
     try{
-        let {dateYear,dateMonth,dateDay,reason,content,reciever,comment,slotId,slotCourse}=req.body;
+        let {dateYear,dateMonth,dateDay,reason,content,reciever,comment,time ,location,slotCourse}=req.body;
         const user=req.user;
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
@@ -52,14 +52,22 @@ router.post('/replacementReq',async(req,res)=>{
             dateMonth,
             dateDay
         )
-        if(!slotId){
-            return res.status(400).json({msg:"Slot Id is required"});
+        const dow=date.getDay();
+          let weekDays=["sun","mon","tue","wed","thu","fri","sat"];
+
+          const day =weekDays[dow];
+
+        if(!time){
+            return res.status(400).json({msg:"Slot info is required"});
+        }
+        if(!location){
+            return res.status(400).json({msg:"Slot info is required"});
         }
         if(!slotCourse){
-            return res.status(400).json({msg:"Slot Course is required"});
+            return res.status(400).json({msg:"Slot info is required"});
         }
 
-        
+
         if(!reciever){
             return res.status(400).json({msg:"Reciever is required"});
         }
@@ -69,11 +77,11 @@ router.post('/replacementReq',async(req,res)=>{
         if(!comment){
             comment="";
         }
-        
+
         if(!content){
             content="";
         }
-        
+
         const userReciever=await Member.findOne({memberId:reciever});
 
         if(!userReciever){
@@ -90,9 +98,9 @@ router.post('/replacementReq',async(req,res)=>{
         console.log(user)
         console.log(user.schedule)
         const theSlot=user.schedule.find((slot)=>{
-            return slot._id==slotId;
+          return (slot.day==day&&slot.time==time&&slot.location==location)
         });
-        
+
         if(!theSlot){
             return res.status(400).json({msg:"Slot is not valid"});
         }
@@ -103,7 +111,7 @@ router.post('/replacementReq',async(req,res)=>{
                 clash=true;
             }
         }
-        
+
 
         if(clash){
             return res.status(400).json({msg:"The Reciever already has a slot at this time"});
@@ -142,7 +150,7 @@ router.get('/replacementReq',async(req,res)=>{
 
         const all = await Request.find({type:"replacement",$or:[{sender: user.memberId},{reciever: user.memberId}]})
         res.json(all);
-        
+
     } catch (error) {
         res.status(500).json({error:error.message})
     }
@@ -155,7 +163,7 @@ router.post('/acceptReplacementReq',async(req,res)=>{
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
-        
+
         if(!repId){
             return res.status(400).json({msg:"invalid request"});
         }
@@ -167,7 +175,7 @@ router.post('/acceptReplacementReq',async(req,res)=>{
                 status:"accepted"
             },
             { new: true })
-            
+
             .then((doc) => {
                 res.send(doc)
               })
@@ -176,7 +184,7 @@ router.post('/acceptReplacementReq',async(req,res)=>{
             }
         );
 
-        
+
     } catch (error) {
         res.status(500).json({error:error.message})
     }
@@ -201,7 +209,7 @@ router.post('/rejectReplacementReq',async(req,res)=>{
                 status:"rejected"
             },
             { new: true },)
-            
+
             .then((doc) => {
                 res.send(doc)
               })
@@ -209,7 +217,7 @@ router.post('/rejectReplacementReq',async(req,res)=>{
                   res.send(err)
             }
         );
-        
+
     } catch (error) {
         res.status(500).json({error:error.message})
     }
@@ -218,7 +226,7 @@ router.post('/rejectReplacementReq',async(req,res)=>{
 router.post('/slotLinkReq',async(req,res)=>{
     try{
         let {reason,content,comment,slotId,slotCourse}=req.body;
-        
+
         const user=req.user;
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
@@ -234,7 +242,7 @@ router.post('/slotLinkReq',async(req,res)=>{
         if(!comment){
             comment="";
         }
-        
+
         if(!content){
             content="";
         }
@@ -283,7 +291,7 @@ router.post('/changeDayOffReq',async(req,res)=>{
         if(!comment){
             comment="";
         }
-        
+
         if(!content){
             content="";
         }
@@ -312,12 +320,12 @@ router.post('/changeDayOffReq',async(req,res)=>{
 
 router.get('/requests',async(req,res)=>{
     try {
-        
+
         let {filter}=req.body;
 
 
         const user=req.user;
-        
+
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
@@ -338,13 +346,13 @@ router.get('/requests',async(req,res)=>{
                 }else{
                     const all = await Request.find({status:'pending',$or:[{sender: user.memberId},{reciever: user.memberId}]})
                     res.json(all);
-                    
+
                 }
             }
         }
 
-        
-        
+
+
     } catch (error) {
         res.status(500).json({error:error.message})
     }
@@ -355,13 +363,13 @@ router.post('/cancelReq',async(req,res)=>{
         let {_id}=req.body;
 
         const user=req.user;
-        
+
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
         const request=await Request.findOne({_id:_id});
-        
+
         if(request.sender!=user.memberId){
             return res.status(400).json({msg:"Access denied"});
         }
@@ -376,7 +384,7 @@ router.post('/cancelReq',async(req,res)=>{
             res.json(request);
             return;
         }
-        
+
         var todaysDate = new Date();
         var reqDate = new Date(request.date)
         if(reqDate>todaysDate) {
@@ -385,7 +393,7 @@ router.post('/cancelReq',async(req,res)=>{
             return;
         }
         return res.status(400).json({msg:"Cannot cancel this request"});
-        
+
 
     }
     catch (error) {
@@ -398,7 +406,7 @@ router.post('/submitLeaves',async(req,res)=>{
         let {dateYear,dateMonth,dateDay,reason,content,comment,type}=req.body;
 
         const user=req.user;
-        
+
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
@@ -440,7 +448,7 @@ router.post('/submitLeaves',async(req,res)=>{
                 comment:comment,
                 status:"pending",
                 Replacements:replacements
-    
+
             })
             request.save().then((data)=>{
                 res.json(data);
@@ -464,7 +472,7 @@ router.post('/submitLeaves',async(req,res)=>{
                 type:type,
                 comment:comment,
                 status:"pending"
-    
+
             })
             request.save().then((data)=>{
                 res.json(data);
@@ -493,7 +501,7 @@ router.post('/submitLeaves',async(req,res)=>{
                 type:type,
                 comment:comment,
                 status:"pending"
-    
+
             })
             request.save().then((data)=>{
                 res.json(data);
@@ -520,7 +528,7 @@ router.post('/submitLeaves',async(req,res)=>{
                 type:type,
                 comment:comment,
                 status:"pending"
-    
+
             })
             request.save().then((data)=>{
                 res.json(data);
@@ -530,7 +538,7 @@ router.post('/submitLeaves',async(req,res)=>{
 
             return;
         }
-        
+
         if(type=='compensation_leave'){
             if(!date){
                 return res.status(400).json({msg:"Date is required"});
@@ -547,7 +555,7 @@ router.post('/submitLeaves',async(req,res)=>{
                 type:type,
                 comment:comment,
                 status:"pending"
-    
+
             })
             request.save().then((data)=>{
                 res.json(data);
@@ -558,10 +566,10 @@ router.post('/submitLeaves',async(req,res)=>{
             return;
         }
 
-        
+
         return res.status(400).json({msg:"Type not valid"});
-        
-        
+
+
     }
     catch (error) {
         res.status(500).json({error:error.message})
@@ -599,7 +607,7 @@ app.post('/member',async(req,res)=>{
         deanName:"name"
     })
     curFaculty.save().then((data)=>{
-        
+
     }).catch((error)=>{
         res.json(error);
         return;
@@ -628,7 +636,7 @@ app.get('/member',async(req,res)=>{
     try {
         const all = await Member.find();
         res.json(all);
-        
+
     } catch (error) {
         res.status(500).json({error:error.message})
     }
