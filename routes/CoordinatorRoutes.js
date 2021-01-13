@@ -176,18 +176,18 @@ router.post('/courseSlot', async (req,res)=>{
 
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
 
-    if(!course)
-    {
-        return res.status(401).send("Access Denied");
-    }
+    // if(!course)
+    // {
+    //     return res.status(401).send("Access Denied");
+    // }
 
     const courseSlot = new CourseSlotModel(req.body.courseSlot);
     // check if there are collisions in the member's schedule
     const collisionSlot = course.courseSchedule.find(slot => slot.day == courseSlot.day && slot.time == courseSlot.time && slot.location == courseSlot.location);
-    if(collisionSlot)
-    {
-        return res.status(406).send("Alrady exist slot with these specifications!");
-    }
+    // if(collisionSlot)
+    // {
+    //     return res.status(406).send("Alrady exist slot with these specifications!");
+    // }
     course.courseSchedule.push(courseSlot);
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
