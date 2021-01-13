@@ -63,75 +63,88 @@ setInterval(async function() {
 },86400000/*24 hours*/ );
 
 
+function setDaysTimeout(callback,days) {
+    // 86400 seconds in a day
+    let msInDay = 86400*1000; 
 
+    let dayCount = 0;
+    let timer = setInterval(function() {
+        dayCount++;  // a day has passed
+
+        if (dayCount === days) {
+           clearInterval(timer);
+           callback.apply(this, []);
+        }
+    }, msInDay);
+}
 
 // // function to compute the missing hours/ missing days -- every month to compute the paid salary for each member
-// setInterval(async function() {
-//     // a = new Date(1999,0,30); // 0 is january
-//     // b = new Date(1999,0,30);
+setDaysTimeout(async function() {
+    // a = new Date(1999,0,30); // 0 is january
+    // b = new Date(1999,0,30);
 
-//     // a.getTime() === b.getTime() // prints true
+    // a.getTime() === b.getTime() // prints true
 
-//     let dateNow = new Date();
-//     let currMonth = dateNow.getMonth(); // 0 based month
+    let dateNow = new Date();
+    let currMonth = dateNow.getMonth(); // 0 based month
 
-//     const allMembers = await MemberModel.find({});
+    const allMembers = await MemberModel.find({});
     
-//     allMembers.forEach(async (mem) => {
-//         const memAttRecords = await AttendanceModel.find({memberId: mem.memberID}).filter(
-//             attRec => attRec.date.getMonth() == currMonth
-//         );
+    allMembers.forEach(async (mem) => {
+        const memAttRecords = await AttendanceModel.find({memberId: mem.memberID}).filter(
+            attRec => attRec.date.getMonth() == currMonth
+        );
 
-//         let missingMinutes = 0;
-//         let missingDays= 0;
+        let missingMinutes = 0;
+        let missingDays= 0;
         
-//         memAttRecords.forEach(record =>{
-//             missingMinutes = missingMinutes + record.missingMinutes;
-//             if(record.missedDay)
-//             {
-//                 missingDays= missingDays + 1;
-//             }
-//         })
-//         // salary computation
-//         // update salary
-//     });
+        memAttRecords.forEach(record =>{
+            missingMinutes = missingMinutes + record.missingMinutes;
+            if(record.missedDay)
+            {
+                missingDays= missingDays + 1;
+            }
+        })
+        // salary computation
+        // update salary
+    });
 
-//     // Getting the date of today
-//     const allAttendanceRecords = await AttendanceModel.find({date:dateNow.getTime()});
+    // Getting the date of today
+    const allAttendanceRecords = await AttendanceModel.find({date:dateNow.getTime()});
 
-//     //should I call .array first
-//     allAttendanceRecords.forEach(async (attRecord) => {
-//         // update the missing/extra hours and the missedDay attributes for this attendance record
-//         // so check if there is an acceptes leave request for this day
-//         const leavingRequests = await requestModel.find({sender:attRecord.memberId,
-//                                                             type:"leave",
-//                                                             status:"accepted",
-//                                                             leavingDate:dateNow.getTime()});
+    //should I call .array first
+    allAttendanceRecords.forEach(async (attRecord) => {
+        // update the missing/extra hours and the missedDay attributes for this attendance record
+        // so check if there is an acceptes leave request for this day
+        const leavingRequests = await requestModel.find({sender:attRecord.memberId,
+                                                            type:"leave",
+                                                            status:"accepted",
+                                                            leavingDate:dateNow.getTime()});
 
-//         if(leavingRequests.length == 0) // no accepted leave request
-//         {
-//             const missingMinutes = computeMissingMinutes(attRecord.sessions);
-//             if(missingMinutes == 504)
-//             {
-//                 // this means that it is a missed day
-//                 attRecord.missingMinutes = 0
-//                 attRecord.missedDay = true
-//             }
-//             else
-//             {
-//                 attRecord.missingMinutes = missingMinutes
-//                 attRecord.missedDay = false;
-//             }
-//         }
-//         else
-//         {
-//             attRecord.missingMinutes = 0
-//             attRecord.missedDay = false;
-//         }
+        if(leavingRequests.length == 0) // no accepted leave request
+        {
+            const missingMinutes = computeMissingMinutes(attRecord.sessions);
+            if(missingMinutes == 504)
+            {
+                // this means that it is a missed day
+                attRecord.missingMinutes = 0
+                attRecord.missedDay = true
+            }
+            else
+            {
+                attRecord.missingMinutes = missingMinutes
+                attRecord.missedDay = false;
+            }
+        }
+        else
+        {
+            attRecord.missingMinutes = 0
+            attRecord.missedDay = false;
+        }
         
-//     });    
+    });    
     
-// },86400000*30 );
+},30);
 
 // setInterval(async function() {
 //     await console.log("bye1");
