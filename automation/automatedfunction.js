@@ -68,12 +68,12 @@ function setDaysTimeout(callback,days) {
     let msInDay = 86400*1000; 
 
     let dayCount = 0;
-    let timer = setInterval(function() {
+    setInterval(function() {
         dayCount++;  // a day has passed
 
         if (dayCount === days) {
-           clearInterval(timer);
            callback.apply(this, []);
+           dayCount=0;
         }
     }, msInDay);
 }
@@ -84,14 +84,15 @@ setDaysTimeout(async function() {
     // b = new Date(1999,0,30);
 
     // a.getTime() === b.getTime() // prints true
-
     let dateNow = new Date();
     let currMonth = dateNow.getMonth(); // 0 based month
 
     const allMembers = await MemberModel.find({});
     
     allMembers.forEach(async (mem) => {
-        const memAttRecords = await AttendanceModel.find({memberId: mem.memberID}).filter(
+        const tmp = await AttendanceModel.find({memberId: mem.memberId});
+
+        const memAttRecords=tmp.filter(
             attRec => attRec.date.getMonth() == currMonth
         );
 
