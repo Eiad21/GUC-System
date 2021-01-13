@@ -261,7 +261,8 @@ router.get("/viewstaffdayoff/:StaffId",async(req,res)=>{
 
 router.get("/Requests",async(req,res)=>{
     //check if iam a Hod using id from token
-
+    console.log("hi")
+console.log(req.user.MemberRank=="hod")
 if(req.user.MemberRank=="hod"){
       await DepartmentSchema.findOne({headID:req.user.memberId}).then(async(doc)=>{
          console.log(doc.departmentName)
@@ -282,6 +283,7 @@ if(req.user.MemberRank=="hod"){
 //either accept or rejet a request
 router.post("/Requests",(req,res)=>{
     //change it to the req.role == head
+    console.log("helloooooooooooooooooooooooooooo")
     if(req.user.MemberRank=="hod")
     {
         //check if the request getting accepted is from the department of this head
@@ -299,15 +301,16 @@ router.post("/Requests",(req,res)=>{
             requestSchema.findOneAndUpdate({_id:req.body.id},{status:req.body.statusType,comment:reqcomment}).then(async(doc)=>{
                 // check if the status is already rejected or accepted so i cant accept it again
                 //console.log(doc)
+                console.log(doc.status)
                 if(doc.status=="pending")
-                {
+                { console.log("himan")
                     if(req.body.statusType=="rejected")
-                {
+                {   
                     res.status("200").send("Ok")
                     return;
                 }
                 if(req.body.statusType=="accepted")
-                {
+                { console.log("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
                         console.log(doc.type)
                     if(doc.type=='changedayoff')
                         {    console.log(doc.newDayOff)
@@ -315,25 +318,31 @@ router.post("/Requests",(req,res)=>{
                             {
                                
 
-                               await memberSchema.findOneAndUpdate({memberId:doc.sender},{dayoff:doc.newDayOff},{new: true}).catch((err)=>{res.status(404).send("Not Found")})
-                                //change koftaa with req.hod.depratment
-                                await DepartmentSchema.findOne({headID:req.user.memberId,departmentName:req.user.departmentName}).then((doc1)=>{
-                                        console.log(doc1)
+                             memberSchema.findOneAndUpdate({memberId:doc.sender},{dayoff:doc.newDayOff},{new: true}).then((doc2)=>{
+                                 DepartmentSchema.findOne({headID:req.user.memberId,departmentName:req.user.departmentName}).then( (doc1)=>{
                                     const indexofmember=doc1.staff.findIndex((value)=>{return value.id==doc.sender})
 
 
-
+                                    console.log("fe 2eh ya 3m")
                                     doc1.staff[indexofmember].dayoff=doc.newDayOff
 
-                                    doc1.save()
-                                    res.status(200).send("OK")
-                                    })
+                                    doc1.save().then((doc3)=>{console.log(doc3);res.status(200).send("Ok"); return;}).catch(err=>{console.log(err);res.status(404).send("OK"); return;})
+                                  
+                                   
+                                    
+
+                                    
+                                    } ).catch((err)=>{console.log("welcome in error");res.status(404).send("Not Found");return ;})
+
+                             }).catch((err)=>{ console.log("welcome in error 2");res.status(404).send("Not Found");return;})
+                                //change koftaa with req.hod.depratment
+                              
                                 
                             }
                         }
-
+                else{
                     if(doc.type=="leave")
-                    {
+                    { 
                         var attendanceRecord
                         let dateObj = new Date();
                         var month = dateObj.getUTCMonth() ; //months from 1-12
@@ -341,38 +350,53 @@ router.post("/Requests",(req,res)=>{
                         var year = dateObj.getUTCFullYear();
                         const todaysDate = new Date(year,month,day);
 
-
-                        var month = doc.date.getUTCMonth() //months from 1-12
-                        var day = doc.date.getUTCDate();
-                        var year = doc.date.getUTCFullYear();
+                        console.log(doc.date)
+                        const leavedate = new Date(req.body.leavingDate);
+                            console.log(leavedate)
+                        var month = leavedate.getUTCMonth() //months from 1-12
+                        var day = leavedate.getUTCDate();
+                        var year = leavedate.getUTCFullYear();
                         const requestleavetime = new Date(year,month,day)
                         console.log(requestleavetime)
                         console.log(todaysDate)
                       
                                 if(requestleavetime-todaysDate<0)
                         {
-                            attendanceSchema.findOneAndUpdate({date:requestleavetime,memberId:doc.sender},{missedDay:false}).then((docer)=>{console.log(docer)})
+                            attendanceSchema.findOneAndUpdate({date:req.body.leavingDate,memberId:doc.sender},{missedDay:false}).then((docer)=>{console.log(docer)})
                            res.status(200).send("OK")
+                           return;
                         }
                     }
 
                     else{
-                        res.status(400).send("Bad Request")
+                        console.log("hiiiiiiiiii")
+                        await requestSchema.findOneAndUpdate({_id:req.body.id},doc).then(()=>{res.status(400).send("Bad Request")})
 
-                    }
+                }       }
                 }
                 else
-                {
-                    res.status(400).send("Bad Request")
+                {                        console.log("dsdsd")
+
+                await  requestSchema.findOneAndUpdate({_id:req.body.id},doc).then(()=>res.status(400).send("Bad Request"))
                 }
                 }
-                else {res.status(406).send("Not Acceptable")}
+                else {
+                    console.log("dsadasasdadsasdasdda")
+
+                    await  requestSchema.findOneAndUpdate({_id:req.body.id},doc).then(()=>res.status(406).send("Not Acceptable"))}
             })
         }
-        else {res.status(400).send("Bad Request")}
+        else {                     console.log("dsadasasdadsasdasdda")
+
+             requestSchema.findOneAndUpdate({_id:req.body.id},doc).then(()=>res.status(400).send("Bad Request"))}
 
     }
-    else (res.status(401).send("Access denied!"))
+    else {
+        console.log("dsadasasdadsasdasdda")
+
+         requestSchema.findOneAndUpdate({_id:req.body.id},doc).then(()=>res.status(401).send("Access denied!"))
+
+    }
 })
 
 
@@ -420,6 +444,17 @@ router.get('/viewteachingassignments', async (req,res)=>{
 
     }).catch(err=>res.status(404).send("Not Found"))
     
+})
+
+
+router.get('/viewAllMembers/:id', async (req, res)=>{
+    console.log(req.user)
+    if(req.user.MemberRank != "hod"){
+        return res.status(401).send("Access denied!");
+    }
+    const users = await memberSchema.findOne({ memberId: req.params.id });
+    res.status(200).send(users);
+    console.log(users);
 })
 
  module.exports=router;
