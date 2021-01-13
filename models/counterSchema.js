@@ -12,7 +12,7 @@ const counterSchema=mongoose.Schema({
     counterCount:
     {
         type:Number,
-        required:true,
+        required:true
     } 
   
   })
