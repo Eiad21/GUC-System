@@ -109,7 +109,9 @@ router.route('/updatePassword')
             return res.status(400).send('You must enter your new password');
         }
         let passwordNewHash= await  bcrypt.hash(req.body.passwordNew, salt)
-
+        console.log("abdullah")
+        console.log(passwordNewHash)
+        console.log("omar")
          let memberoz= await memberSchema.findOne(
             //  {memberId: request.body.memberId}, function(err, mem) {
 
