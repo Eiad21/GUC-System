@@ -55,7 +55,8 @@ router.route('/viewProfile')
     
    // res.redirect('/profile');
     res.send(req.user);
-})
+}
+    )
 
 // router.route('/updateProfile')
 // .get(async (req, res )=>{
@@ -73,12 +74,12 @@ router.route('/viewProfile')
 
 
  router.route('/updateProfile')
-    .post(async (req, res )=>{
+ .post(async (req, res )=>{
  
         let memberoz= await memberSchema.findOne( 
            
             {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
-                );
+        );
 
                 if(!memberoz){
                     res.status(400).send("Not found");
