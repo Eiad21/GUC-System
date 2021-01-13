@@ -130,7 +130,7 @@ router.post('/acceptSlotLinking', async (req,res)=>{
 
 
 // input: request ID || or all request paramters ????
-router.post('/rejecttSlotLinking', async (req,res)=>{
+router.post('/rejectSlotLinking', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
     if(req.user.MemberRank != "coordinator")
@@ -232,8 +232,8 @@ router.delete('/courseSlot', async (req,res)=>{
     // {
     //     return res.status(404).send("Not found!");
     // }
-    const deletedSlot= course.courseSchedule.find(slot => slot.slotID == req.body.slotID);
-    if(!deletedSlot){
+const deletedSlot= course.courseSchedule.find((slot) => {slot.day == req.body.day && slot.time == req.body.time && slot.location == req.body.location});
+  if(!deletedSlot){
         res.status(406).send("Access denied");
 
     }
