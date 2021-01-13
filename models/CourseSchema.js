@@ -8,6 +8,12 @@ const courseSchema=mongoose.Schema({
     required:true,
     unique:true
   },
+  facultyName:{
+    type:String
+  },
+  departmentName:{
+    type:String
+  },
   assignedCount:
   {
     type:Number,
