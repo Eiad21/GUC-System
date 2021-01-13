@@ -8,6 +8,9 @@ const departmentSchema=new mongoose.Schema({
         type:String,
         required:true,
       },
+      facultyName:{
+        type:String
+      },
     headID:{ 
         type:String,
         required:true,

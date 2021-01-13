@@ -214,6 +214,7 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
 
       const CourseRecord= doc.courses.filter((value,index)=>{return value.courseName==req.params.CourseName})
       var allcourseinsideDepartmentInstructors={Instructors:CourseRecord[0].instructors, TAs:CourseRecord[0].TAs}
+      console.log(allcourseinsideDepartmentInstructors)
      res.send(allcourseinsideDepartmentInstructors)
         
     })
@@ -228,7 +229,7 @@ router.get("/viewstaffdayoff",async(req,res)=>{
      await DepartmentSchema.findOne({headID:req.user.memberId}).then((doc)=>{
 
         var allstaffdayoffarray=[]
-        doc.staff.forEach((value)=>{allstaffdayoffarray.push({Name:value.name ,Mail:value.mail,DayOff:value.dayoff})})
+        doc.staff.forEach((value)=>{allstaffdayoffarray.push({id:value.id,Name:value.name ,Mail:value.mail,DayOff:value.dayoff})})
         if(allstaffdayoffarray!=[])
          res.status(200).send(allstaffdayoffarray)
          else(res.status(404).send("there is no Staff in Your department"))
@@ -247,7 +248,7 @@ router.get("/viewstaffdayoff/:StaffId",async(req,res)=>{
          var StaffDayOffArray=doc.staff.filter((value)=>{return value.id==req.params.StaffId})
          
          if(StaffDayOffArray.length==1)
-         res.status(200).send({Name:StaffDayOffArray[0].name ,Mail:StaffDayOffArray[0].mail, DayOff:StaffDayOffArray[0].dayoff})
+         res.status(200).send([{Name:StaffDayOffArray[0].name ,Mail:StaffDayOffArray[0].mail, DayOff:StaffDayOffArray[0].dayoff}])
          else
          {
              res.status(404).send("this staff is not in your department")
@@ -456,5 +457,30 @@ router.get('/viewAllMembers/:id', async (req, res)=>{
     res.status(200).send(users);
     console.log(users);
 })
+
+router.get("/viewallCourse",async(req,res)=>{
+    //check if iam a Hod using id from token
+    if(req.user.MemberRank=="hod"){
+     await DepartmentSchema.findOne({headID:req.user.memberId}).then((doc)=>{
+
+       res.status(200).send(doc.courses)
+     }).catch((err)=>{res.status(404).send("Not Found")})
+    }
+    else{res.status(401).send("Access denied!")}
+
+})
+
+router.get("/viewallMemberids",async(req,res)=>{
+    //check if iam a Hod using id from token
+    if(req.user.MemberRank=="hod"){
+     await DepartmentSchema.findOne({headID:req.user.memberId}).then((doc)=>{
+
+       res.status(200).send(doc.staff)
+     }).catch((err)=>{res.status(404).send("Not Found")})
+    }
+    else{res.status(401).send("Access denied!")}
+
+})
+
 
  module.exports=router;
