@@ -38,6 +38,7 @@ router.route('/logIn')
         Facultyname:user.FacultyName,
         departmentName:user.departmentName,
         email:user.email,
+        bio:user.bio,
         //password:hashedPass,
 
         salary:user.salary,
@@ -46,7 +47,7 @@ router.route('/logIn')
         dayoff:user.dayoff,
         schedule:user.schedule
 
-    
+
 }, process.env.TOKEN_SECRET)
     res.header('auth-token', token).send(token)
 })

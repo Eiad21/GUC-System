@@ -30,10 +30,10 @@ router.route('/logOut')
 }
     )
 
-/// authentication 
+/// authentication
 // module.exports= (req, res, next)=>{
 //     const token= req.headers.token
-//     if(!token)  
+//     if(!token)
 //     {
 //         res.status(401).status('Access deined')
 //     }
@@ -52,20 +52,20 @@ router.route('/logOut')
 
 router.route('/viewProfile')
 .get(async (req, res )=>{
-    
+
    // res.redirect('/profile');
-    res.send(req.user);
-})
+   const user = await memberSchema.findOne({memberId:req.user.memberId});
+       res.send(user);})
 
 // router.route('/updateProfile')
 // .get(async (req, res )=>{
-        
+
 //     res.redirect('/updateProfile');
 // }
 //     )
     // router.route('/doneReturn')
     // .get(async (req, res )=>{
-            
+
     //     res.redirect('/');
     // }
     //     )
@@ -74,9 +74,9 @@ router.route('/viewProfile')
 
  router.route('/updateProfile')
     .post(async (req, res )=>{
- 
-        let memberoz= await memberSchema.findOne( 
-           
+
+        let memberoz= await memberSchema.findOne(
+
             {$and:[{email:req.user.email},{memberId:req.user.memberId}]}
                 );
 
@@ -90,12 +90,12 @@ router.route('/viewProfile')
                 await memberoz.save();
                 res.send(memberoz)
             }
-        
-    
+
+
         )
 
-   
- 
+
+
 router.route('/updatePassword')
 
 .put(async (req, res )=>{
@@ -108,11 +108,11 @@ router.route('/updatePassword')
         if(!req.body.passwordNew){
             return res.status(400).send('You must enter your new password');
         }
-        let passwordNewHash= await  bcrypt.hash(req.body.passwordNew, salt) 
+        let passwordNewHash= await  bcrypt.hash(req.body.passwordNew, salt)
 
-         let memberoz= await memberSchema.findOne( 
+         let memberoz= await memberSchema.findOne(
             //  {memberId: request.body.memberId}, function(err, mem) {
-           
+
             //     if(!err)
             //     mem.password = temp;
             //    else res.send("error user not found"+err);
@@ -128,18 +128,18 @@ router.route('/updatePassword')
 
                 else{return res.status(400).send('enter correct password ')}
             }
-        
-    
+
+
         )
 
 
 router.route('/signIn')
-  
+
 //  member1.save().then(()=>console.log("record added")).catch(err=>{console.log(err)});
     .post(async (req, res )=>{
         let dateObj = new Date();
 
-        let temp =new signInSessionSchema({timein:dateObj 
+        let temp =new signInSessionSchema({timein:dateObj
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
@@ -179,18 +179,18 @@ router.route('/signIn')
 
     }
 
-                
-            
+
+
 )
 router.route('/signOut')
-  
+
 
     .post(async (req, res )=>{
 
 
         let dateObj = new Date();
 
-        let temp =new signInSessionSchema({timeout:dateObj 
+        let temp =new signInSessionSchema({timeout:dateObj
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
@@ -222,34 +222,34 @@ router.route('/signOut')
         }
         else{
             console.log('session added' +sess)
-           
-            
-            let len = sess.sessions.length-1; 
+
+
+            let len = sess.sessions.length-1;
                  if(! sess.sessions[len].timeout){
                      const diffTime = Math.abs(dateObj - sess.sessions[len].timein);
-                     const diffMinutes = Math.ceil(diffTime / (1000 * 60  )); 
+                     const diffMinutes = Math.ceil(diffTime / (1000 * 60  ));
                      console.log('time out added ')
                      sess.sessions[len].timeout=dateObj;
                      sess.missingMinutes=sess.missingMinutes-diffMinutes;
                      await sess.save();
                      res.send("time out added")
-                 } 
+                 }
 
                  else{
                     sess.sessions.push(temp);
                     await sess.save();
-                    res.send('time out slot added ') 
+                    res.send('time out slot added ')
                  }
-        }   
-    }                    
+        }
+    }
 )
 
 router.route('/viewAttendance')
-  
+
     .get(async (req, res )=>{
         let dateObj = new Date();
 
-        let temp =new signInSessionSchema({timein:dateObj 
+        let temp =new signInSessionSchema({timein:dateObj
         });
 
         let month = dateObj.getUTCMonth() ; //months from 1-12
@@ -271,8 +271,8 @@ router.route('/viewAttendance')
 
     }
 
-                
-            
+
+
 )
 
 
@@ -289,12 +289,12 @@ router.route('/viewAttendance')
 router.post('/viewMyAttendance', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
-    const sessionsMissed = 
+    const sessionsMissed =
         await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0});
     //console.log(timeArray)
 
     let sum=0;
-    for (i in sessionsMissed) 
+    for (i in sessionsMissed)
     {
         sum=sum+timeArray[i].missingMinutes
     }
@@ -312,12 +312,12 @@ router.post('/viewMyAttendance', async (req,res)=>{
 router.post('/viewMembersMissingHoursAndExtraHours', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
-    const timeArray = 
+    const timeArray =
         await attendanceSchema.find( {memberId:req.user.memberId} ,{missingMinutes:1, _id:0});
     //console.log(timeArray)
 
     let sum=0;
-    for (i in timeArray) 
+    for (i in timeArray)
     {
         sum=sum+timeArray[i].missingMinutes
     }
