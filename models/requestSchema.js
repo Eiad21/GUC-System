@@ -2,16 +2,16 @@ const mongoose = require('mongoose');
 const {slotSchema} = require('./slotSchema');
 
 const requestSchema=mongoose.Schema({
-    date:
+    date: 
     {
         type:Date
     },
 
-    reason:
+    reason: 
     {
         type:String
     },
-    content:{
+    content:{ 
         type:String
     },
     sender:
@@ -21,14 +21,14 @@ const requestSchema=mongoose.Schema({
       // let's check about referencing
         //  ref:"Member"
     },
-    reciever:
+    reciever: 
     {
         type:String,
         required:true,
       // let's check about referencing
         //  ref:"Member"
     },
-    type:
+    type:  
     {
         // leave OR slot_linking OR replacement OR change_day_off
         type:String,
@@ -42,12 +42,12 @@ const requestSchema=mongoose.Schema({
         required:true
     },
 
-    comment:
+    comment: 
     {
         type:String
     },
     //in case of change_day_off
-    newDayOff:{
+    newDayOff:{ 
         type:String
     },
     //in case of annual leave
@@ -65,6 +65,16 @@ const requestSchema=mongoose.Schema({
         type:String
     },
     slotId:{
+        type:String
+    },
+    // in case of replacement request
+    slotDay:{
+        type:String
+    },
+    slotTime:{
+        type: Number
+    },
+    slotLocation:{
         type:String
     }
 })

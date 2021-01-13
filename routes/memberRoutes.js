@@ -55,8 +55,7 @@ router.route('/viewProfile')
     
    // res.redirect('/profile');
     res.send(req.user);
-}
-    )
+})
 
 // router.route('/updateProfile')
 // .get(async (req, res )=>{
