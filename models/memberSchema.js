@@ -65,8 +65,10 @@ const memberSchema = mongoose.Schema({
     {
         type:String,
         required:true
-        
-
+    },
+    changedDefaultPass:{
+        type:Boolean,
+        default:false
     },
     schedule:[slotSchema]
 });

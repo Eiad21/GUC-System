@@ -169,10 +169,10 @@ router.post('/updateFaculty', async (req,res)=>{
                 doc.facultyName = req.body.facultyNameNew
             }
             if(req.body.deanID){
-                doc.facultyName = req.body.facultyNameNew
+                doc.deanID = req.body.deanID
             }
-            if(req.body.facultyNameNew){
-                doc.facultyName = req.body.facultyNameNew
+            if(req.body.deanName){
+                doc.deanName = req.body.deanName
             }
             doc.save();
             console.log(doc);
@@ -832,30 +832,12 @@ router.post('/addNewSignRecord', async (req,res)=>{
         return res.status(400).send("Bad request");
     }
 })
-router.post('/viewAllStaffAttendance', async (req,res)=>{
-    if(req.user.MemberRank != "hr"){
-        return res.status(401).send("Access denied!");
-    }
-    Attendance.find()
-    .then((doc) =>{
-        if(!doc){
-            return res.status(400).send("Not found!");
-        }
-        res.send(doc)
-        console.log(doc)
-    })
-    .catch((err) => {
-        console.error(err);
-        res.send(err)
-  }
-);
-})
 
 router.post('/viewStaffAttendance', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
     }
-    Attendance.findOne(
+    Attendance.find(
         {memberId:req.body.memberId}
     )
     .then((doc) =>{

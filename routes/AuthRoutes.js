@@ -2,6 +2,7 @@ const { Router } = require("express");
 const express = require("express");
 var router = express.Router();
 const memberSchema = require("../models/memberSchema").constructor
+const Counter = require("../models/counterSchema").constructor
 //const authoController =require("../controllers/authController")
 const bcrypt =require('bcryptjs');
 // const { jsonwebtoken } = require('jsonwebtoken')
@@ -72,7 +73,7 @@ router.post('/addHr', async (req,res)=>{
     const salt = await bcrypt.genSalt(10);
     const hashedPass = await bcrypt.hash("123456", salt);
     console.log(prefix);
-    const member = await new Member({
+    const member = await new memberSchema({
          name:"default default",
          gender:"M",
          memberId:"hr-1",
