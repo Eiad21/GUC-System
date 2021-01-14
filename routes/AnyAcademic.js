@@ -22,6 +22,8 @@ const getCoursesInDep = async function(facultyName,departmentName){
     return department.courses;
 };
 
+
+// return user.schedule
 router.get('/schedule',async(req,res)=>{
     try {
         const user=req.user;
@@ -36,10 +38,10 @@ router.get('/schedule',async(req,res)=>{
     }
 })
 
-
+// sending replacement request
 router.post('/replacementReq',async(req,res)=>{
     try{
-        let {dateYear,dateMonth,dateDay,reason,content,reciever,comment,time ,location,slotCourse}=req.body;
+        let {dateYear,dateMonth,dateDay,reason,content,comment,reciever,time ,location,slotCourse}=req.body;
         const user=req.user;
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
