@@ -14,8 +14,6 @@ const jwt=require('jsonwebtoken');
 
 
 // HR Routes
-// Location manipulation
-
 function authenticate(req){
     const token = req.body.token;
     console.log("token")
@@ -30,6 +28,16 @@ function authenticate(req){
     }
 }
 
+// Location manipulation
+
+router.post('/viewAllLocations', async (req, res)=>{
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    const locs = await Location.find();
+    res.send(locs);
+    console.log(locs);
+})
 router.post('/addLocation', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
          return res.status(401).send("Access denied!");
@@ -224,6 +232,7 @@ router.post('/addDepartment', async (req,res)=>{
                 // Create Department
             const department= await new Department({
                 departmentName:req.body.departmentName,
+                facultyName: req.body.facultyName,
                 headID:req.body.headID,
                 // get automatically
                 headName:req.body.headName,
@@ -356,11 +365,16 @@ router.post('/addCourse', async (req,res)=>{
                     // Add the course
                     const course= await new Course({
                         courseName:req.body.courseName,
+                        facultyName: req.body.facultyName,
+                        departmentName: req.body.departmentName,
+                        assignedCount:0,
                         coverage:0,
                         coordinatorID:req.body.coordinatorID,
                         // get auto
                         coordinatorName:req.body.coordinatorName
                     });
+
+                    console.log(course)
 
                     doc.departments[i].courses.push(course);
                     
@@ -555,7 +569,8 @@ router.post('/addMember', async (req,res)=>{
          memberId:prefix,
          email:req.body.email,
          password:hashedPass,
-         MemberRank:req.body.MemberRank
+         MemberRank:req.body.MemberRank,
+         officeLocation:req.body.office
      });
 
     member.save().then((data)=>{

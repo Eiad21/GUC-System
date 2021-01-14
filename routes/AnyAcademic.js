@@ -127,7 +127,8 @@ router.post('/replacementReq',async(req,res)=>{
             status:"pending",
             comment:comment,
             slotId:slotId,
-            slotCourse:slotCourse
+            slotCourse:slotCourse,
+            slotTime:time
         })
         request.save().then((data)=>{
             res.json(data);
@@ -141,20 +142,37 @@ router.post('/replacementReq',async(req,res)=>{
 })
 
 
-router.get('/replacementReq',async(req,res)=>{
+router.get('/sentReplacementReq',async(req,res)=>{
     try {
         const user=req.user;
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
             return res.status(400).json({msg:"Access denied"});
         }
 
-        const all = await Request.find({type:"replacement",$or:[{sender: user.memberId},{reciever: user.memberId}]})
+        const all = await Request.findMany({type:"replacement", sender: user.memberId})
         res.json(all);
 
     } catch (error) {
         res.status(500).json({error:error.message})
     }
 })
+
+router.get('/recievedReplacementReq',async(req,res)=>{
+    try {
+        const user=req.user;
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
+        const all = await Request.findMany({type:"replacement", reciever: user.memberId})
+        res.json(all);
+
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+})
+
+
 
 router.post('/acceptReplacementReq',async(req,res)=>{
     try {
@@ -225,7 +243,7 @@ router.post('/rejectReplacementReq',async(req,res)=>{
 
 router.post('/slotLinkReq',async(req,res)=>{
     try{
-        let {reason,content,comment,slotId,slotCourse}=req.body;
+        let {reason,content,comment,day,time,location,slotCourse}=req.body;
 
         const user=req.user;
         if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
@@ -255,7 +273,9 @@ router.post('/slotLinkReq',async(req,res)=>{
             type:"slot_linking",
             status:"pending",
             comment:comment,
-            slotId:slotId
+            slotDay:day,
+            slotTime:time,
+            slotLocation:location
         })
         request.save().then((data)=>{
             res.json(data);
@@ -318,7 +338,7 @@ router.post('/changeDayOffReq',async(req,res)=>{
     }
 })
 
-router.get('/requests',async(req,res)=>{
+router.get('/sentRequests',async(req,res)=>{
     try {
 
         let {filter}=req.body;
@@ -331,20 +351,61 @@ router.get('/requests',async(req,res)=>{
         }
 
         if(!filter){
-            const all = await Request.find({$or:[{sender: user.memberId},{reciever: user.memberId}]})
+            const all = await Request.find({sender: user.memberId})
             res.json(all);
         }
         else{
             if(filter=="accepted"){
-                const all = await Request.find({status:'accepted',$or:[{sender: user.memberId},{reciever: user.memberId}]})
+                const all = await Request.find({status:'accepted', sender: user.memberId})
                 res.json(all);
             }
             else{
                 if(filter=="rejected"){
-                    const all = await Request.find({status:'rejected',$or:[{sender: user.memberId},{reciever: user.memberId}]})
+                    const all = await Request.find({status:'rejected',sender: user.memberId})
                     res.json(all);
                 }else{
-                    const all = await Request.find({status:'pending',$or:[{sender: user.memberId},{reciever: user.memberId}]})
+                    const all = await Request.find({status:'pending',sender: user.memberId})
+                    res.json(all);
+
+                }
+            }
+        }
+
+
+
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+})
+
+
+router.get('/recievedRequests',async(req,res)=>{
+    try {
+
+        let {filter}=req.body;
+
+
+        const user=req.user;
+
+        if(!(user.memberId[0]=='a' && user.memberId[1]=='c')){
+            return res.status(400).json({msg:"Access denied"});
+        }
+
+        if(!filter){
+            const all = await Request.find({reciever: user.memberId})
+            res.json(all);
+        }
+        else{
+            if(filter=="accepted"){
+                const all = await Request.find({status:'accepted', reciever: user.memberId})
+                res.json(all);
+            }
+            else{
+                if(filter=="rejected"){
+                    const all = await Request.find({status:'rejected',reciever: user.memberId})
+                    res.json(all);
+                }else{
+                    const all = await Request.find({status:'pending',reciever: user.memberId})
                     res.json(all);
 
                 }

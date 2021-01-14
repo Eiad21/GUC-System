@@ -7,6 +7,10 @@ const attendanceSchema=mongoose.Schema({
         type:String,
         required: true
       },
+      memberName:
+      {
+        type:String
+      },  
     date:{type:Date, // year, month, day OR Number and the result og get time in case that == does not gets the value of
       required:true,
     },
