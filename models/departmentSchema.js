@@ -30,8 +30,8 @@ const departmentSchema=new mongoose.Schema({
           required:true
         },
         MemberRank:{type:String,
-            required:true
-        },
+          required:true
+      },
         mail:{
           type:String,
           required:true
