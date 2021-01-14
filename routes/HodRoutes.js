@@ -13,39 +13,48 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
 
 // dont forget to check the memberRank should be instructor and check the department of the instructor to be the same as department of HOD in the Line Below 
     if(req.user.MemberRank=="hod"){
-    memberSchema.findOne({memberId:req.body.memberId,MemberRank:"instructor",departmentName:req.user.departmentName},(err,doc)=>{if(err){res.statusCode=404; res.send(err)}; console.log(doc)}).then(async(memberRecord)=>{
+    memberSchema.findOne({memberId:req.body.memberId,MemberRank:"instructor",departmentName:req.user.departmentName},(err,doc)=>{if(err){res.status(404).send(err)}; console.log(doc)}).then(async(memberRecord)=>{
     
      if (memberRecord)
         {
              CourseSchema.findOne({courseName:req.body.courseName}).then (async(CourseRecord)=>{
-            console.log(CourseRecord)
             if(CourseRecord)
                 {
-                   const foundRecord=CourseRecord.instructors.filter((value,index)=>{return value.memberId==memberRecord.memberId})
-                   console.log(foundRecord)
+                   const foundRecord=CourseRecord.instructors.filter((value,index)=>{  return value.id==memberRecord.memberId})
                     if(foundRecord.length==0)
                     {    
-                        var NewInstructorData=CourseRecord.instructors.concat(memberRecord)
+                        var NewInstructorData=CourseRecord.instructors.concat({id:memberRecord.memberId, name:memberRecord.name,mail:memberRecord.email,office:memberRecord.officeLocation})
                             CourseSchema.findOneAndUpdate(
                                 {courseName:req.body.courseName},
                                 {instructors:NewInstructorData},
                                  {new: true}
                             ).then((doc) => {
-                                console.log(doc);
-                                res.send(doc)
+                               
+                                DepartmentSchema.findOne({headID:req.user.memberId}).then((docer)=>{
+
+                                   docer.courses=docer.courses.filter((element)=>{
+                                    return element.courseName!=req.body.courseName})
+                                    docer.courses.push(doc)
+                                    console.log(docer.courses[0].instructors)
+                                    docer.save();
+                                    res.status(200).send("OK")
+
+                                  }).catch((err)=>{res.status(404).send("Not Found")})
+
+
                               }).catch((err)=>{res.send(err)})
 
                     }
                     else
-                    {res.send("You can not assign a course to this instructor because its already assigned to him/her")}
+                    {return res.status(400).send("Bad Request")}
                 }
-                else{res.send("Course data not present in Database")}
+                else{return res.status(404).send("Not Found")}
 
     
-             }).catch((err)=>{res.send(err)})
+             }).catch((err)=>{return res.status(404).send(err)})
 
         }
-        else{res.send("Member data not present in Database")
+        else{res.status(404).send("Not Found")
     
 
     }
@@ -157,7 +166,7 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
                             console.log(CourseRecord)
                             if(CourseRecord)
                                 {
-                                   const foundRecord=CourseRecord.instructors.filter((value,index)=>{return value.memberId==memberRecord.memberId})
+                                   const foundRecord=CourseRecord.instructors.filter((value,index)=>{return value.id==memberRecord.memberId})
                                    console.log(foundRecord)
                                     if(foundRecord.length==1)
                                     {    
@@ -167,8 +176,15 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
                                                 {instructors:NewInstructorData},
                                                  {new: true}
                                             ).then((doc) => {
-                                                console.log(doc);
-                                                res.send(doc)
+                                                DepartmentSchema.findOne({headID:req.user.memberId}).then((docer)=>{
+
+                                                    docer.courses=docer.courses.filter((element)=>{
+                                                     return element.courseName!=req.body.courseName})
+                                                     docer.courses.push(doc)
+                                                     docer.save();
+                                                     res.status(200).send("OK")
+                 
+                                                   }).catch((err)=>{res.status(404).send("Not Found")})
                                               }).catch((err)=>{res.send(err)})
                 
                                     }
@@ -481,6 +497,8 @@ router.get("/viewallMemberids",async(req,res)=>{
     else{res.status(401).send("Access denied!")}
 
 })
+
+
 
 
  module.exports=router;
