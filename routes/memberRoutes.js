@@ -249,18 +249,9 @@ router.route('/signOut')
 router.route('/viewAttendance')
 
     .get(async (req, res )=>{
-        let dateObj = new Date();
-
-        let temp =new signInSessionSchema({timein:dateObj
-        });
-
-        let month = dateObj.getUTCMonth() ; //months from 1-12
-        let day = dateObj.getUTCDate()+1;
-        let year = dateObj.getUTCFullYear();
-        let dateoz = new Date(year,month,day);
 
         const sess =await attendanceSchema.find(
-            {memberId:req.body.memberId});
+            {memberId:req.user.memberId});
         if(sess){
 
             res.send(sess);
