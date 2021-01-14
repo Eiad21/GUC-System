@@ -69,6 +69,7 @@ router.post('/addLocation', async (req,res)=>{
 })
 
 router.post('/updateLocation', async (req,res)=>{
+    console.log("a7mad")
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
    }
@@ -79,13 +80,13 @@ router.post('/updateLocation', async (req,res)=>{
             if(!doc){
                 return res.status(404).send("Not found");
             }
-            if(locationNameNew){
+            if(req.body.locationNameNew){
                 doc.locationName = req.body.locationNameNew;
             }
-            if(capacity){
+            if(req.body.capacity){
                 doc.capacity = req.body.capacity;
             }
-            if(locationType){
+            if(req.body.locationType){
                 doc.locationType = req.body.locationType;
             }
             doc.save();
@@ -282,12 +283,18 @@ router.post('/updateDepartment', async (req,res)=>{
                     // For values you don't wish to change enter the old value
                     if(req.body.departmentNameNew){
                         doc.departments[i].departmentName = req.body.departmentNameNew;
+                        for(j in doc.departments[i].courses){
+                            doc.departments[i].courses[j].departmentName = req.body.departmentNameNew;
+                        }
                     }
 
                     // TODO: Valide id and name
-                    doc.departments[i].headID = req.body.headID;
-                    doc.departments[i].headName = req.body.headName;
-                    
+                    if(req.body.headID){
+                        doc.departments[i].headID = req.body.headID;
+                    }
+                    if(req.body.headName){
+                        doc.departments[i].headName = req.body.headName;    
+                    }
                     // Save department with updated values
                     doc.save().then((doc) => {
                         console.log(doc);
@@ -348,6 +355,23 @@ router.post('/deleteDepartment', async (req,res)=>{
 })
 
 // Course within Department within Faculty manipulation
+router.post('/viewAllCourses', async (req, res)=>{
+    console.log(req.user)
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    const facs = await Faculty.find();
+    let arr = []
+    for(i in facs){
+        let deps = facs[i].departments;
+        for(j in deps){
+            let courses = deps[i].courses;
+            arr = arr.concat(courses);
+        }
+    }
+    res.send(arr);
+    console.log(arr);
+})
 router.post('/addCourse', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
@@ -357,7 +381,11 @@ router.post('/addCourse', async (req,res)=>{
         {facultyName: req.body.facultyName})
              
         .then(async (doc) => {
-            // Find the Department
+            if(!doc){
+                res.statusCode = 404;
+                res.send();
+            }
+            // Found the Department
             var flag = false;
             for(i in doc.departments){
                 if(doc.departments[i].departmentName === req.body.departmentName){
@@ -418,10 +446,16 @@ router.post('/updateCourse', async (req,res)=>{
                         if(doc.departments[i].courses[j].courseName === req.body.courseNameOld){
                             console.log("Found Course")
                             flag = true;
-                            doc.departments[i].courses[j].courseName = req.body.courseNameNew
-                            doc.departments[i].courses[j].coverage = req.body.coverage
-                            doc.departments[i].courses[j].coordiantorID = req.body.coordiantorID
-                            doc.departments[i].courses[j].coordinatorName = req.body.coordinatorName
+                            if(req.body.courseNameNew){
+                                doc.departments[i].courses[j].courseName = req.body.courseNameNew
+                            }
+                            // doc.departments[i].courses[j].coverage = req.body.coverage
+                            if(req.body.coordiantorID){
+                                doc.departments[i].courses[j].coordiantorID = req.body.coordiantorID
+                            }
+                            if(req.body.coordinatorName){
+                                doc.departments[i].courses[j].coordinatorName = req.body.coordinatorName
+                            }
                             //TEST THIS METHOD
                         }
                     }
@@ -797,6 +831,24 @@ router.post('/addNewSignRecord', async (req,res)=>{
     else{
         return res.status(400).send("Bad request");
     }
+})
+router.post('/viewAllStaffAttendance', async (req,res)=>{
+    if(req.user.MemberRank != "hr"){
+        return res.status(401).send("Access denied!");
+    }
+    Attendance.find()
+    .then((doc) =>{
+        if(!doc){
+            return res.status(400).send("Not found!");
+        }
+        res.send(doc)
+        console.log(doc)
+    })
+    .catch((err) => {
+        console.error(err);
+        res.send(err)
+  }
+);
 })
 
 router.post('/viewStaffAttendance', async (req,res)=>{
