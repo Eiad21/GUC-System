@@ -40,6 +40,7 @@ router.get('/viewSlotLinkingReqs', async (req,res)=>{
           })
     });
     res.send(allRequests);
+    //res.send([])
 
 })
 
@@ -208,7 +209,7 @@ router.post('/courseSlot', async (req,res)=>{
 
 
 // input: courseName && courseSlotID -- check for existence
-router.delete('/courseSlot', async (req,res)=>{
+router.post('/deleteSlot', async (req,res)=>{
     // getting the member requesting this get from the data base by the token
     // and putting it in a variable  req.member using middleware
     if(req.user.MemberRank != "coordinator")
@@ -258,6 +259,7 @@ const deletedSlot= course.courseSchedule.find((slot) => {slot.day == req.body.da
     await fac.save();
 
     res.json(course);
+res.send("omar gamed")
 })
 
 module.exports=router;
