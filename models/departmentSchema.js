@@ -29,7 +29,9 @@ const departmentSchema=new mongoose.Schema({
           type:String,
           required:true
         },
-        
+        MemberRank:{type:String,
+          required:true
+      },
         mail:{
           type:String,
           required:true

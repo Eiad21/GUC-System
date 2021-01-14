@@ -636,7 +636,10 @@ router.put('/courseCoordinator', async (req,res)=>{
     const TA =await MemberModel.findOne({memberId: req.body.memberID});
 	if(!TA){
 		return res.status(401).send("Not valid TA ID");
-	}
+    }
+    if(TA.MemberRank!=="TA"){
+        return res.status(401).send("only TAs can be coordinator");
+    }
     if(TA.departmentName != departmentName)
     {
         return res.status(406).send("Not accepted! the academic member is from another department");
@@ -650,13 +653,28 @@ router.put('/courseCoordinator', async (req,res)=>{
         const oldTA =await MemberModel.findOne({memberId: course.coordinatorID});
         if(oldTA.MemberRank=='coordinator'){
             oldTA.MemberRank = "TA";
+        
+            department.staff.forEach((staffItem,idx)=>{
+                if(staffItem.id == oldTA.memberId)
+                {
+                    department.staff[idx].MemberRank="TA";
+                }
+            });
         }
         await oldTA.save();
     }
-    TA.MemberRank = "coordinator";
+    if(TA.MemberRank=="TA"){
+        TA.MemberRank = "coordinator";
+        department.staff.forEach((staffItem,idx)=>{
+            if(staffItem.id == TA.memberId)
+            {
+                department.staff[idx].MemberRank="coordinator";
+            }
+        });
+    }
     await TA.save();
     course.coordinatorID = TA.memberId;
-    course.coordinatorName = TA.name;
+    course.coordinatorName = TA.name; 
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
         {
