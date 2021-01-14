@@ -18,10 +18,10 @@ const connectionParams={
 
  //const url="mongodb+srv://abdoolelcool:abdoolelcool@cluster0.vf8uu.mongodb.net/Gamed?retryWrites=true&w=majority"
 //const url="mongodb+srv://sawan:7777777o@cluster0.d4j6s.mongodb.net/TheSawanDB?retryWrites=true&w=majority"
-//const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
+const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
 // const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
 //const url='mongodb+srv://KimoBase:Kimo1234@cluster0.3eaqp.mongodb.net/GUCSys?retryWrites=true'
-  const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
+ // const url='mongodb+srv://karimanga:123456abc@cluster0.ecodf.mongodb.net/guc?retryWrites=true'
 
 
 mongoose.connect(url,connectionParams).then(()=>{

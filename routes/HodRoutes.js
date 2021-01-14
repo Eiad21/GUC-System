@@ -71,13 +71,16 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
         // dont forget to check the memberRank should be instructor and check the department of the instructor to be the same as department of HOD in the Line Below 
             if(req.user.MemberRank=="hod"){
             memberSchema.findOne({memberId:req.body.memberIdtodelete,MemberRank:"instructor",departmentName:req.user.departmentName},(err,doc)=>{if(err){res.send(err)}; }).then(async(memberRecordtodelete)=>{
-            
+                console.log("member to delete")
+                console.log(memberRecordtodelete)
+
               if (memberRecordtodelete)
                 {
                    memberSchema.findOne({memberId:req.body.memberIdtoAssign,MemberRank:"instructor",departmentName:req.user.departmentName},(err,doc)=>{if(err){res.send(err)}; }).then(async(memberRecordtoAssign)=>{
 
                          if (memberRecordtoAssign)
                         {
+                            console.log("member to assign")
                             console.log(memberRecordtoAssign)
                      // U should check that the HOd department and the department the course is in 
 
@@ -88,74 +91,80 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
 
 
 
-                        const foundRecord=CourseRecord.instructors.filter((value,index)=>{return value.memberId==memberRecordtoAssign.memberId})
+                        const foundRecord=CourseRecord.instructors.filter((value,index)=>{return value.id==memberRecordtoAssign.memberId})
                         //console.log(foundRecord)
                           if(foundRecord.length==0)
                           {    
-                              var NewInstructorData=CourseRecord.instructors.concat(memberRecordtoAssign)
+                              var NewInstructorData=CourseRecord.instructors.concat({id:memberRecordtoAssign.memberId, name:memberRecordtoAssign.name,mail:memberRecordtoAssign.email,office:memberRecordtoAssign.officeLocation})
                                   CourseSchema.findOneAndUpdate(
                                       {courseName:req.body.courseName},
                                       {instructors:NewInstructorData},
                                        {new: true}
                                   ).then((doc) => {
 
-                                    const foundRecordofdelete=doc.instructors.filter((value,index)=>{return value.memberId==memberRecordtodelete.memberId})
+                                    const foundRecordofdelete=doc.instructors.filter((value,index)=>{return value.id==memberRecordtodelete.memberId})
                                     console.log(foundRecordofdelete)
                                      if(foundRecordofdelete.length==1)
                                      {    
-                                         var NewInstructorData=doc.instructors.filter((value,index)=>{return value.memberId!=memberRecordtodelete.memberId})
+                                         var NewInstructorData=doc.instructors.filter((value,index)=>{return value.id!=memberRecordtodelete.memberId})
                                              CourseSchema.findOneAndUpdate(
                                                  {courseName:req.body.courseName},
                                                  {instructors:NewInstructorData},
                                                   {new: true}
-                                             ).then((doc)=>{res.send(doc)}).catch((err)=>{res.send(err)})
+                                             ).then((doc)=>{
+                                                DepartmentSchema.findOne({headID:req.user.memberId}).then((docer)=>{
+
+                                                    docer.courses=docer.courses.filter((element)=>{
+                                                     return element.courseName!=req.body.courseName})
+                                                     docer.courses.push(doc)
+                                                     console.log(docer.courses[0].instructors)
+                                                     docer.save();
+                                                     res.status(200).send("OK")
+                 
+                                                   }).catch((err)=>{res.status(404).send("Not Found")})
+
+                                             }).catch((err)=>{res.status(404).send("Not Found")})
                  
                                      }
-                                     else{res.send("The Instructor u want to delete is not assigned this course to be deleted from him/her")}
+                                     else{res.status(400).send("Bad Request")}
 
 
 
-                                    }).catch((err)=>{res.send(err)})
+                                    }).catch((err)=>{res.status(404).send("Not Found")})
       
                           }
                           else
-                          {res.send("You can not assign a course to this instructor because its already assigned to him/her")}
-
-
-                           
-
-
-
-                     
-
+                          {res.status(400).send("Bad Request")}
 
                     }
-                        else{res.send("Course data not present in Database")}
+                        else{res.status(404).send("Not Found")}
                     }).catch((err)=>{res.send(err)})
 
 
                          } 
-                         else{res.send("MembertobeAssigned data not present in Database")}
-                          }).catch((err)=>{res.send(err)})
+                         else{res.status(404).send("Not Found")}
+                          }).catch((err)=>{res.status(404).send("Not Found")})
 
                      
         
             
         
                 }
-                else{res.send("MembertobeDeleted data not present in Database")
+                else{res.status(404).send("Not Found")
             
         
             }
         
         
-                }).catch((err)=>{res.send(err)})
+                }).catch((err)=>{res.status(404).send("Not Found")})
             } else(res.status(401).send("UnAutorized"))
             })
 
     
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             router.delete("/AssignCourseInstructor", async(req,res,next)=>{
+                console.log("hi")
+                console.log(req.body)
                 if(req.user.MemberRank=="hod"){
                 // dont forget to check the memberRank should be instructor and check the department of the instructor to be the same as department of HOD in the Line Below 
                     memberSchema.findOne({memberId:req.body.memberId,MemberRank:"instructor",departmentName:req.user.departmentName},(err,doc)=>{if(err){res.send(err)}; console.log(doc)}).then(async(memberRecord)=>{
@@ -170,12 +179,15 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
                                    console.log(foundRecord)
                                     if(foundRecord.length==1)
                                     {    
-                                        var NewInstructorData=CourseRecord.instructors.filter((value,index)=>{return value.memberId!=memberRecord.memberId})
+                                        var NewInstructorData=CourseRecord.instructors.filter((value,index)=>{return value.id!=memberRecord.memberId})
+                                        console.log("new inst")
+                                        console.log(NewInstructorData)
                                             CourseSchema.findOneAndUpdate(
                                                 {courseName:req.body.courseName},
                                                 {instructors:NewInstructorData},
                                                  {new: true}
                                             ).then((doc) => {
+                                                console.log(doc)
                                                 DepartmentSchema.findOne({headID:req.user.memberId}).then((docer)=>{
 
                                                     docer.courses=docer.courses.filter((element)=>{
@@ -189,15 +201,15 @@ const attendanceSchema = require("../models/attendanceSchema").constructor
                 
                                     }
                                     else
-                                    {res.send("The Instructor u want to delete is not assigned this course to be deleted from him/her")}
+                                    {res.status(400).send("Bad Request")}
                                 }
-                                else{res.send("Course data not present in Database")}
+                                else{res.status(404).send("Not Found")}
                 
                     
                              }).catch((err)=>{res.send(err)})
                 
                         }
-                        else{res.send("Member data not present in Database")
+                        else{res.status(404).send("Not Found")
                     
                 
                     }
