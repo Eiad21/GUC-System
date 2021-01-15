@@ -255,7 +255,6 @@ router.route('/viewAttendance')
         const sess =await attendanceSchema.find(
             {memberId:req.user.memberId});
         if(sess){
-
             res.send(sess);
         }
        else{

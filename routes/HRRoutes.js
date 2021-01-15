@@ -866,18 +866,19 @@ router.post('/viewStaffAttendance', async (req,res)=>{
 );
 })
 
-router.get('/viewMembersMissingTime', async (req,res)=>{
+router.post('/viewMembersMissingTime', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
     }
+    console.log(req.body.date)
     const membersIDsMissingTime = 
-        await Attendance.find( {$or: [{missedDay: true}, {missingMinutes: {$gt: 0}}]} ,{memberId:1, _id:0}).distinct('memberId');
+        await Attendance.find({$and: [{date:req.body.date},{$or: [{missedDay: true}, {missingMinutes: {$gt: 0}}]}]} ,{memberId:1, _id:0}).distinct('memberId');
     
+    console.log(membersIDsMissingTime)
     const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
 
-    console.log(membersMissingTime);
     res.send(membersMissingTime);
 })
 
@@ -897,6 +898,7 @@ router.post('/updateMemberSalary', async (req,res)=>{
     if(req.body.memberId === req.user.memberId){
         return res.status(401).send("Access denied!");
     }
+    console.log(req.body.memberId)
     Member.findOne(
         {memberId:req.body.memberId})
     .then((doc) =>{
