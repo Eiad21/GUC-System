@@ -288,11 +288,12 @@ router.post('/slotLinkReq',async(req,res)=>{
     catch (error) {
         res.status(500).json({error:error.message})
     }
+//    res.send("kofta kbeera")
 })
 router.post('/changeDayOffReq',async(req,res)=>{
     try{
         let {reason,content,comment,newDayOff}=req.body;
-        const user=req.user;
+         const user=req.user;
 
         //query to get the HOD
         const deps = await getDepartmentsInFac(user.Facultyname);
@@ -338,6 +339,7 @@ router.post('/changeDayOffReq',async(req,res)=>{
     catch (error) {
         res.status(500).json({error:error.message})
     }
+    //res.send("omar gada3")
 })
 
 router.get('/sentRequests',async(req,res)=>{
