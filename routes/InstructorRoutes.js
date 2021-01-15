@@ -250,36 +250,37 @@ router.delete('/slotAcadMember/:cname/:slotid', async (req,res)=>{
     {
         return res.status(401).send("You are not an instructor for this course!");
     }
-    course.courseSchedule.forEach(async (slot,idx)=>{
-        //to be _id
-        if(slot._id == req.body.slotID)
+    const slot=course.courseSchedule.find(slot => slot._id==req.body.slotID);
+    if(!slot.assignedMemberID)
+    {
+        return res.status(406).send("This slot is already unassigned!");
+        // or
+        // return res.send();
+    }
+    const oldAssignedMemberID = slot.assignedMemberID;
+    
+    course.courseSchedule=course.courseSchedule.map((item)=>{
+       return item._id==req.body.slotID?
         {
-            if(!slot.assignedMemberID)
-            {
-                return res.status(406).send("This slot is already unassigned!");
-                // or
-                // return res.send();
-            }
-            const oldAssignedMemberID = slot.assignedMemberID;
-            course.courseSchedule[idx]={
-                slotID: slot.slotID,
-                day: slot.day,
-                time: slot.time,
-                location: slot.location,
-                assignedMemberID: "",
-                assignedMemberName: ""
-            };
-            course.assignedCount = course.assignedCount-1;
-            // update the schedule of this member ---> adding this slot to it
-            const member = await MemberModel.findOne({memberId: oldAssignedMemberID});
-            member.schedule = member.schedule.filter((memSlot)=>{
-                return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName );                
-            });
-            await member.save();
-
-            res.json(member);
+            slotID: slot.slotID,
+            day: slot.day,
+            time: slot.time,
+            location: slot.location,
+            assignedMemberID: "",
+            assignedMemberName: ""
         }
+        :
+        item;
     });
+    course.assignedCount = course.assignedCount-1;
+    // update the schedule of this member ---> adding this slot to it
+    const member = await MemberModel.findOne({memberId: oldAssignedMemberID});
+    member.schedule = member.schedule.filter((memSlot)=>{
+        return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName );                
+    });
+    await member.save();
+
+    res.json(member);
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
         {
@@ -330,52 +331,53 @@ router.put('/slotAcadMember', async (req,res)=>{
     {
         return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
     }
-    course.courseSchedule.forEach(async (slot,idx)=>{
-        if(slot._id == req.body.slotID)
-        {
-            if(!slot.assignedMemberID)
-            {
-                //return res.status(401).send("This slot is already unassigned!");
-                course.assignedCount = course.assignedCount+1;
-                //do nothing
-            }
-            else
-            {
-                const oldAssignedMemberID = slot.assignedMemberID;
-                // update the schedule of old member ---> removing this slot to it
-                const oldMember = await MemberModel.findOne({memberId: oldAssignedMemberID});
-                oldMember.schedule = oldMember.schedule.filter((memSlot)=>{
-                return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName ); 
-                });
-                await oldMember.save();
-            }
-            
-            // update the schedule of new member ---> adding this slot to it
-            const newMember = TA;
-            course.courseSchedule[idx]={
-                slotID: slot.slotID,
-                day: slot.day,
-                time: slot.time,
-                location: slot.location,
-                assignedMemberID: req.body.assignedMemberID,
-                assignedMemberName: TA.name
-            };
-			
-			const tailoredSlot = {
-                day:slot.day,
-                time:slot.time,
-                location:slot.location,
-                courseName:course.courseName
-            };
-            // check if there are collisions in the member's schedule
-            const collisionSlot = member.schedule.find(slot => slot.day == tailoredSlot.day && slot.time == tailoredSlot.time)
-            if(collisionSlot)
-            {
-                return res.status(406).send("This academic member has another course slot at this timing!");
-            }
-            newMember.schedule.push(tailoredSlot);
-            await newMember.save();
-        }
+    var newslot={};
+    const slot=course.courseSchedule.find(slot => slot._id==req.body.slotID);
+    
+    const tailoredSlot = {
+        day:slot.day,
+        time:slot.time,
+        location:slot.location,
+        courseName:course.courseName
+    };
+    // check if there are collisions in the member's schedule
+    const collisionSlot = TA.schedule.find(slot => slot.day == tailoredSlot.day && slot.time == tailoredSlot.time)
+    if(collisionSlot)
+    {
+        return res.status(406).send("This academic member has another course slot at this timing!");
+    }
+    TA.schedule.push(tailoredSlot);
+    await TA.save();
+    if(!slot.assignedMemberID)
+    {
+        //return res.status(401).send("This slot is already unassigned!");
+        course.assignedCount = course.assignedCount+1;
+        //do nothing
+    }
+    else
+    {
+        const oldAssignedMemberID = slot.assignedMemberID;
+        // update the schedule of old member ---> removing this slot to it
+        const oldMember = await MemberModel.findOne({memberId: oldAssignedMemberID});
+        oldMember.schedule = oldMember.schedule.filter((memSlot)=>{
+        return !( memSlot.day==slot.day&&memSlot.time==slot.time&&memSlot.location==slot.location&&memSlot.courseName==course.courseName ); 
+        });
+        await oldMember.save();
+    }
+    
+    // update the schedule of new member ---> adding this slot to it
+    
+    newslot={
+        slotID: slot.slotID,
+        day: slot.day,
+        time: slot.time,
+        location: slot.location,
+        assignedMemberID: req.body.assignedMemberID,
+        assignedMemberName: TA.name
+    };
+    
+    course.courseSchedule=course.courseSchedule.map((item)=>{
+        return item._id==req.body.slotID?newslot:item;
     });
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
@@ -389,6 +391,7 @@ router.put('/slotAcadMember', async (req,res)=>{
             fac.departments[idx] = department
         }
     });
+    
     await fac.save();
 	
 	res.send('ok');
