@@ -259,7 +259,7 @@ router.route('/viewAttendance')
             res.send(sess);
         }
        else{
-           res.send("no attendance")
+           res.send([])
 
         }
 
@@ -281,21 +281,17 @@ router.route('/viewAttendance')
 
 
 /////// same method viewStuffAttendance
-router.post('/viewMyAttendance', async (req,res)=>{
+router.post('/viewMissingDays', async (req,res)=>{
     //const loc = await Location.find({locationType:"Office"},{locationName:1, _id:0}).distinct('locationName');
     //const loc = await Location.find({$and: [{capacity: {$gt: 5}}, {population: 0}]});
     const sessionsMissed =
-        await attendanceSchema.find( {memberId:req.user.memberId} ,{missedDay:1, _id:0});
+        await attendanceSchema.find( {memberId:req.user.memberId,missedDay:true} ,{date:1, _id:0});
     //console.log(timeArray)
 
-    let sum=0;
-    for (i in sessionsMissed)
-    {
-        sum=sum+timeArray[i].missingMinutes
-    }
 
-   // console.log(sum)
-    res.send(sessionsMissed)
+    console.log('sessionsMissed');
+   console.log(sessionsMissed);
+    return res.json(sessionsMissed)
     // const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
 
     // console.log(membersMissingTime);
@@ -316,9 +312,9 @@ router.post('/viewMembersMissingHoursAndExtraHours', async (req,res)=>{
     {
         sum=sum+timeArray[i].missingMinutes
     }
-
-   // console.log(sum)
-    res.send(sum/60)
+    console.log('sum');
+    console.log(~~(sum/60));
+    return res.json(JSON.stringify(~~(sum/60)));
     // const membersMissingTime = await Member.find({memberId: {$in:membersIDsMissingTime}})
 
     // console.log(membersMissingTime);
