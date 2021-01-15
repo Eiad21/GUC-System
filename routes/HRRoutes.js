@@ -543,6 +543,7 @@ router.post('/viewAllMembers', async (req, res)=>{
 })
 router.post('/addMember', async (req,res)=>{
     console.log(0);
+    console.log(req.user.MemberRank)
     console.log(req.user)
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
@@ -566,9 +567,14 @@ router.post('/addMember', async (req,res)=>{
 
         return res.status(400).send("Member gender must be specified");
     }
+    if(!req.body.salary){
+        console.log("6")
+
+        return res.status(400).send("Member salary must be specified");
+    }
     const user = await Member.findOne({email:req.body.email});
     if(user){
-        console.log("6")
+        console.log("7")
 
         return res.status(401).send("Member already exists");
     }
@@ -603,6 +609,7 @@ router.post('/addMember', async (req,res)=>{
          memberId:prefix,
          email:req.body.email,
          password:hashedPass,
+         salary:req.body.salary,
          MemberRank:req.body.MemberRank,
          officeLocation:req.body.office
      });
@@ -620,8 +627,9 @@ router.post('/updateMemberDepartment', async (req,res)=>{
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
     }
-    if(!req.body.memberId || !req.body.facultyName || req.body.departmentName){
-        return res.status(400).send("You need to specify ID, facult name, and department name");
+
+    if(!req.body.memberId || !req.body.facultyName || !req.body.departmentName){
+        return res.status(400).send("You need to specify ID, faculty name, and department name");
     }
 
         // Add to new Fac and Dep
@@ -634,7 +642,6 @@ router.post('/updateMemberDepartment', async (req,res)=>{
             }
 
             const values = {id: mem.memberId, name: mem.name, mail: mem.email, office: mem.officeLocation}
-        
             const depNew = doc.departments.find(item => {
                 return item.departmentName === req.body.departmentName;
             })
@@ -800,6 +807,7 @@ router.post('/addNewSignRecord', async (req,res)=>{
         Attendance.findOne({date:req.body.date, memberId:req.body.memberId})
         .then((doc) =>{
             if(!doc){
+                console.log("DIDNT FIND ATTENDANCE")
                 return res.status(404).send("Not found");
             }
             if(!req.body.sessionId){
@@ -807,6 +815,8 @@ router.post('/addNewSignRecord', async (req,res)=>{
             }
             else{
                 const session = doc.sessions[req.body.sessionId-1];
+                console.log(req.body.signOut)
+                console.log(session.timeout)
                 if(req.body.signOut && !session.timeout){
                     session.timeout = req.body.signOut;
                 }
@@ -814,12 +824,14 @@ router.post('/addNewSignRecord', async (req,res)=>{
                     session.timein = req.body.signIn;
                 }
                 else{
-                    res.status(404).send("Not found");
+                    console.log("Oh")
+                    return res.status(400).send("Not found");
                 }
 
                 doc.missingMinutes -= (session.timeout.getTime() - session.timein.getTime()) / (1000 * 60);
 
                 doc.save();
+                return res.status(200).send("Good");
             }
         })
         .catch((err) =>{
@@ -870,13 +882,16 @@ router.get('/viewMembersMissingTime', async (req,res)=>{
 })
 
 router.post('/updateMemberSalary', async (req,res)=>{
+    console.log("Backend salary")
     if(req.user.MemberRank != "hr"){
         return res.status(401).send("Access denied!");
     }
     if(!req.body.memberId){
+        console.log("no id")
         return res.status(400).send("Bad request");
     }
     if(!req.body.salary){
+        console.log("no salary")
         return res.status(400).send("Bad request");
     }
     if(req.body.memberId === req.user.memberId){
