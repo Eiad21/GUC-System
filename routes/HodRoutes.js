@@ -438,7 +438,16 @@ router.get("/viewcoverageofcourses",async(req,res)=>{
    await DepartmentSchema.findOne({headID:req.user.memberId}).then((doc)=>{
 var allcoursescoverage= [];
        doc.courses.forEach(element => {
-           allcoursescoverage.push({CourseName:element.courseName, Coverage:(element.assignedCount/element.courseSchedule.length)*100})
+           if(element.courseSchedule.length==0)
+           {
+            allcoursescoverage.push({CourseName:element.courseName, Coverage:0})
+
+           }
+           else
+           {
+            allcoursescoverage.push({CourseName:element.courseName, Coverage:(element.assignedCount/element.courseSchedule.length)*100})
+
+           }
        })
            res.status(200).send(allcoursescoverage)
       
