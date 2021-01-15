@@ -72,14 +72,14 @@ router.post('/acceptSlotLinking', async (req,res)=>{
     await slotLinkingReq.save();
 
     // // check the following or assume handled
-    // if(TA.departmentName != departmentName)
-    // {
-    //     return res.status(406).send("Not accepted to assign an academic member from another department!");
-    // }
-    // if(!isTAOfCourse(course,TA.memberID))
-    // {
-    //     return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
-    // }
+    if(TA.departmentName != departmentName)
+    {
+        return res.status(406).send("Not accepted to assign an academic member from another department!");
+    }
+    if(!isTAOfCourse(course,TA.memberID))
+    {
+        return res.status(406).send("Not accepted! This academic member is NOT from the course staff");
+    }
     course.courseSchedule.forEach(async(slot,idx)=>{
         if(slot._id == slotLinkingReq.slotID)
         {
@@ -169,7 +169,7 @@ router.post('/courseSlot', async (req,res)=>{
     {
         return res.status(401).send("Access denied!");
     }
-    const facultyName = req.user.Facultyname;
+    const facultyName = req.user.Facultyname;x
     const departmentName = req.user.departmentName;
     const fac =await FacultyModel.findOne({facultyName: facultyName});
     const department = fac.departments.find(dep => dep.departmentName == departmentName);
@@ -177,18 +177,18 @@ router.post('/courseSlot', async (req,res)=>{
 
     const course = coursesCoordinated.find(course => course.courseName == req.body.courseName);
 
-    // if(!course)
-    // {
-    //     return res.status(401).send("Access Denied");
-    // }
+    if(!course)
+    {
+        return res.status(401).send("Access Denied");
+    }
 
     const courseSlot = new CourseSlotModel(req.body.courseSlot);
     // check if there are collisions in the member's schedule
     const collisionSlot = course.courseSchedule.find(slot => slot.day == courseSlot.day && slot.time == courseSlot.time && slot.location == courseSlot.location);
-    // if(collisionSlot)
-    // {
-    //     return res.status(406).send("Alrady exist slot with these specifications!");
-    // }
+    if(collisionSlot)
+    {
+        return res.status(406).send("Alrady exist slot with these specifications!");
+    }
     course.courseSchedule.push(courseSlot);
     department.courses.forEach((courseItem,idx)=>{
         if(courseItem.courseName == course.courseName)
@@ -259,7 +259,7 @@ const deletedSlot= course.courseSchedule.find((slot) => {slot.day == req.body.da
     await fac.save();
 
     res.json(course);
-res.send("omar gamed")
+res.send("omar gamed");
 })
 
 module.exports=router;
