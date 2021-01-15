@@ -159,6 +159,7 @@ router.route('/signIn')
             console.log('day added')
 
             let temp2=new attendanceSchema({
+                memberName:req.user.name,
                 memberId:req.user.memberId,
                 date:dateoz,
                 sessions:[temp],
@@ -210,6 +211,7 @@ router.route('/signOut')
             console.log('day added')
 
             let temp2=new attendanceSchema({
+                memberName:req.user.name,
                 memberId:req.user.memberId,
                 date:dateoz,
                 sessions:[temp],
@@ -225,7 +227,7 @@ router.route('/signOut')
         else{
             console.log('session added' +sess)
 
-
+            sess.missedDay = false;
             let len = sess.sessions.length-1;
                  if(! sess.sessions[len].timeout){
                      const diffTime = Math.abs(dateObj - sess.sessions[len].timein);
@@ -237,11 +239,11 @@ router.route('/signOut')
                      res.send("time out added")
                  }
 
-                 else{
+                else{
                     sess.sessions.push(temp);
                     await sess.save();
                     res.send('time out slot added ')
-                 }
+                }
         }
     }
 )
